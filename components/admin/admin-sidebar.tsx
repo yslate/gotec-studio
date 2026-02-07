@@ -15,6 +15,8 @@ const navItems = [
   { href: '/admin/cards', label: 'Black Cards' },
   { href: '/admin/gl-tickets', label: 'Gästeliste' },
   { href: '/admin/check-in', label: 'Check-in' },
+  { href: '/admin/inquiries', label: 'Anfragen' },
+  { href: '/admin/applications', label: 'Bewerbungen' },
 ];
 
 function MenuIcon({ className }: { className?: string }) {

@@ -1,93 +1,131 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { SessionCard } from '@/components/booking/session-card';
-import { Button } from '@/components/ui/button';
+import { SiteHeader } from '@/components/site-header';
+import { Footer } from '@/components/footer';
 
-async function getSessions() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/sessions`, {
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    return [];
-  }
-
-  return res.json();
-}
-
-export default async function HomePage() {
-  const sessions = await getSessions();
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
-          <div className="flex items-center justify-between gap-4">
-            <Link href="/">
-              <Image
-                src="/LogoGotecRecords.png"
-                alt="GOTEC Records"
-                width={140}
-                height={50}
-                className="h-8 sm:h-10 w-auto"
-                priority
-              />
-            </Link>
-            <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
-              <Link href="/my-bookings">Meine Buchungen</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col">
+      <SiteHeader heroMode />
 
-      <main className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-sm sm:text-base font-medium mb-1 sm:mb-2">Verfügbare Sessions</h2>
-          <p className="text-xs text-muted-foreground">
-            Wähle eine Recording Session und buche deinen Platz mit deiner Black Card
+      {/* Hero Section - pulls up behind the transparent header */}
+      <section className="relative h-[70vh] min-h-[400px] flex items-center justify-center overflow-hidden -mt-[57px]">
+        <Image
+          src="/hero.jpg"
+          alt="GOTEC Records Studio"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
+        <div className="relative z-10 container mx-auto px-4 text-center flex flex-col items-center gap-8">
+          <Image
+            src="/LogoGotecRecords.png"
+            alt="GOTEC Records"
+            width={320}
+            height={110}
+            className="h-14 sm:h-20 md:h-24 w-auto"
+          />
+          <p className="text-sm sm:text-base text-white/70 max-w-md tracking-wide">
+            DJ Recording Studio &mdash; Karlsruhe
+          </p>
+          <Link
+            href="/sessions"
+            className="inline-flex items-center gap-2 border border-white/30 bg-white/5 backdrop-blur px-6 py-3 text-xs uppercase tracking-widest text-white/90 hover:bg-white/10 hover:border-white/50 transition-all"
+          >
+            View Sessions
+          </Link>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="container mx-auto px-4 py-16 sm:py-24 max-w-2xl">
+        <h2 className="text-xs uppercase tracking-widest text-primary mb-6">About</h2>
+        <div className="space-y-5 text-sm text-muted-foreground leading-relaxed">
+          <p>
+            Gotec Records is a professional DJ recording studio based in Karlsruhe, Germany.
+            We specialize in capturing raw, unfiltered DJ sessions across various genres of
+            electronic music &mdash; from hard techno and industrial to melodic techno and minimal.
+          </p>
+          <p>
+            Our studio is built for artists who want to record their sound in a professional
+            environment and become part of our curated output. Every session is captured with
+            precision, delivering the energy of a live performance.
           </p>
         </div>
+      </section>
 
-        {sessions.length === 0 ? (
-          <div className="text-center py-12 border border-dashed">
-            <p className="text-muted-foreground text-sm">
-              Aktuell keine Sessions verfügbar
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Schau später wieder vorbei!
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {sessions.map((session: {
-              id: string;
-              title: string;
-              artistName: string;
-              date: string;
-              startTime: string;
-              endTime: string;
-              maxCardholders: number;
-              maxWaitlist: number;
-              description?: string | null;
-              bookedCount: number;
-              waitlistCount: number;
-            }) => (
-              <SessionCard key={session.id} session={session} />
-            ))}
-          </div>
-        )}
-      </main>
-
-      <footer className="border-t mt-auto">
-        <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} GOTEC Records. Alle Rechte vorbehalten.</p>
-          <div className="flex gap-4">
-            <Link href="/impressum" className="hover:text-foreground transition-colors">Impressum</Link>
-            <Link href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</Link>
+      {/* Black Card Teaser */}
+      <section className="border-t">
+        <div className="container mx-auto px-4 py-16 sm:py-20 max-w-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-12">
+            <div className="flex-1">
+              <h2 className="text-xs uppercase tracking-widest text-primary mb-4">The Black Card</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                You don&apos;t ask for it. You earn it &mdash; by fully vibing with the music
+                at Gotec Club. When your energy stands out, someone will notice and hand you
+                the Black Card.
+              </p>
+              <Link
+                href="/blackcard"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
+              >
+                Learn more &rarr;
+              </Link>
+            </div>
+            <div className="sm:w-48 border p-6 text-center shrink-0">
+              <p className="text-2xl font-light text-primary mb-1">100</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Cards in Circulation</p>
+            </div>
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* Apply Teaser */}
+      <section className="border-t">
+        <div className="container mx-auto px-4 py-16 sm:py-20 max-w-2xl">
+          <h2 className="text-xs uppercase tracking-widest text-primary mb-4">Recording Slot Application</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+            We are opening a limited number of recording slots for DJs with a clear musical
+            identity and a passion for electronic music. Submit your application and become
+            part of our curated output.
+          </p>
+          <Link
+            href="/apply"
+            className="inline-flex items-center border px-5 py-2.5 text-xs uppercase tracking-widest text-foreground hover:border-primary/50 hover:text-primary transition-colors"
+          >
+            Apply now &rarr;
+          </Link>
+        </div>
+      </section>
+
+      {/* Contact Teaser */}
+      <section className="border-t">
+        <div className="container mx-auto px-4 py-12 max-w-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-xs uppercase tracking-widest text-primary mb-2">Questions?</h2>
+            <p className="text-sm text-muted-foreground">
+              Get in touch for collaborations, feedback, or general inquiries.
+            </p>
+          </div>
+          <div className="flex gap-4 shrink-0">
+            <Link
+              href="/contact"
+              className="inline-flex items-center border px-5 py-2.5 text-xs uppercase tracking-widest text-foreground hover:border-primary/50 hover:text-primary transition-colors"
+            >
+              Contact
+            </Link>
+            <a
+              href="mailto:info@gotec-records.com"
+              className="inline-flex items-center px-5 py-2.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              info@gotec-records.com
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }

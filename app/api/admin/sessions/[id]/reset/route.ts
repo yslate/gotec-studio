@@ -57,7 +57,7 @@ export async function POST(
     const cardIds = [...new Set(noShowBookings.map(b => b.cardId))];
 
     // Increment noShowCount for each card
-    let lockedCards: string[] = [];
+    let lockedCards: number[] = [];
     for (const cardId of cardIds) {
       // Increment and get updated count
       const updatedCard = await db
@@ -75,7 +75,7 @@ export async function POST(
           .update(blackCards)
           .set({
             status: 'locked',
-            lockReason: `Automatisch gesperrt: ${updatedCard[0].noShowCount} No-Shows`,
+            notes: `Automatisch gesperrt: ${updatedCard[0].noShowCount} No-Shows`,
             updatedAt: new Date(),
           })
           .where(eq(blackCards.id, cardId));

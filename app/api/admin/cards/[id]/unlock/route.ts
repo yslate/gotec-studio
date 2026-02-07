@@ -26,7 +26,6 @@ export async function POST(
       .set({
         status: 'active',
         suspendedUntil: null,
-        lockReason: null,
         noShowCount: 0, // Reset no-show count on unlock
         updatedAt: new Date(),
       })

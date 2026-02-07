@@ -6,6 +6,8 @@ export const userRoleEnum = pgEnum('user_role', ['admin', 'staff']);
 export const cardStatusEnum = pgEnum('card_status', ['active', 'locked', 'suspended']);
 export const bookingStatusEnum = pgEnum('booking_status', ['confirmed', 'waitlist', 'cancelled', 'checked_in', 'no_show']);
 export const ticketStatusEnum = pgEnum('ticket_status', ['valid', 'used', 'expired']);
+export const inquiryStatusEnum = pgEnum('inquiry_status', ['new', 'read', 'archived']);
+export const applicationStatusEnum = pgEnum('application_status', ['new', 'reviewed', 'accepted', 'rejected']);
 
 // Users table - Admin and Staff accounts
 export const users = pgTable('users', {
@@ -105,6 +107,31 @@ export const checkIns = pgTable('check_ins', {
   checkedInAt: timestamp('checked_in_at').notNull().defaultNow(),
 });
 
+// Contact Inquiries table
+export const contactInquiries = pgTable('contact_inquiries', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  subject: varchar('subject', { length: 255 }).notNull(),
+  message: text('message').notNull(),
+  status: inquiryStatusEnum('status').notNull().default('new'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// Recording Applications table
+export const recordingApplications = pgTable('recording_applications', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull(),
+  artistName: varchar('artist_name', { length: 255 }).notNull(),
+  genre: varchar('genre', { length: 255 }).notNull(),
+  artistOrigin: varchar('artist_origin', { length: 255 }).notNull(),
+  instagramUrl: varchar('instagram_url', { length: 500 }),
+  soundcloudUrl: varchar('soundcloud_url', { length: 500 }),
+  message: text('message').notNull(),
+  status: applicationStatusEnum('status').notNull().default('new'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Relations
 export const recordingSessionsRelations = relations(recordingSessions, ({ many }) => ({
   bookings: many(bookings),
@@ -181,3 +208,7 @@ export type CheckIn = typeof checkIns.$inferSelect;
 export type NewCheckIn = typeof checkIns.$inferInsert;
 export type EmailVerificationCode = typeof emailVerificationCodes.$inferSelect;
 export type NewEmailVerificationCode = typeof emailVerificationCodes.$inferInsert;
+export type ContactInquiry = typeof contactInquiries.$inferSelect;
+export type NewContactInquiry = typeof contactInquiries.$inferInsert;
+export type RecordingApplication = typeof recordingApplications.$inferSelect;
+export type NewRecordingApplication = typeof recordingApplications.$inferInsert;
