@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Ungültige Daten', details: validationResult.error.flatten() },
+        { error: 'Invalid data', details: validationResult.error.flatten() },
         { status: 400 }
       );
     }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (!verification.length) {
       return NextResponse.json(
-        { error: 'Verifizierung nicht gefunden' },
+        { error: 'Verification not found' },
         { status: 404 }
       );
     }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Check if already verified
     if (verificationData.verified) {
       return NextResponse.json(
-        { error: 'Diese Verifizierung wurde bereits verwendet' },
+        { error: 'This verification has already been used' },
         { status: 400 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Check if expired
     if (new Date(verificationData.expiresAt) < new Date()) {
       return NextResponse.json(
-        { error: 'Bestätigungscode ist abgelaufen. Bitte fordere einen neuen Code an.' },
+        { error: 'Verification code has expired. Please request a new code.' },
         { status: 400 }
       );
     }
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Check if code matches
     if (verificationData.code !== code) {
       return NextResponse.json(
-        { error: 'Ungültiger Bestätigungscode' },
+        { error: 'Invalid verification code' },
         { status: 400 }
       );
     }
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     if (!card.length) {
       return NextResponse.json(
-        { error: 'Karte nicht gefunden' },
+        { error: 'Card not found' },
         { status: 400 }
       );
     }
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Re-check card status (might have changed since verification request)
     if (cardData.status !== 'active') {
       return NextResponse.json(
-        { error: 'Diese Karte ist nicht mehr aktiv' },
+        { error: 'This card is no longer active' },
         { status: 400 }
       );
     }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     if (!session.length) {
       return NextResponse.json(
-        { error: 'Session nicht gefunden' },
+        { error: 'Session not found' },
         { status: 404 }
       );
     }
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     if (existingBooking.length) {
       return NextResponse.json(
-        { error: 'Es existiert bereits eine Buchung für diese Karte oder E-Mail' },
+        { error: 'A booking already exists for this card or email' },
         { status: 400 }
       );
     }
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
       position = currentWaitlist + 1;
     } else {
       return NextResponse.json(
-        { error: 'Diese Session ist leider voll' },
+        { error: 'This session is unfortunately full' },
         { status: 400 }
       );
     }
@@ -218,13 +218,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       booking: newBooking[0],
       message: bookingStatus === 'confirmed'
-        ? 'Buchung erfolgreich bestätigt!'
-        : `Du bist auf der Warteliste (Position ${position})`,
+        ? 'Booking successfully confirmed!'
+        : `You are on the waitlist (position ${position})`,
     });
   } catch (error) {
     console.error('Failed to verify and create booking:', error);
     return NextResponse.json(
-      { error: 'Buchung konnte nicht erstellt werden' },
+      { error: 'Booking could not be created' },
       { status: 500 }
     );
   }

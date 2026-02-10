@@ -48,18 +48,18 @@ export default async function AdminSessionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold">Sessions</h1>
-          <p className="text-xs text-muted-foreground">Alle Recording Sessions verwalten</p>
+          <p className="text-xs text-muted-foreground">Manage all recording sessions</p>
         </div>
         <Button asChild size="sm">
-          <Link href="/admin/sessions/new">+ Neue Session</Link>
+          <Link href="/admin/sessions/new">+ New Session</Link>
         </Button>
       </div>
 
       {sessions.length === 0 ? (
         <div className="text-center py-12 border border-dashed">
-          <p className="text-muted-foreground text-sm">Keine Sessions vorhanden</p>
+          <p className="text-muted-foreground text-sm">No sessions found</p>
           <Button asChild className="mt-4" size="sm">
-            <Link href="/admin/sessions/new">Erste Session erstellen</Link>
+            <Link href="/admin/sessions/new">Create First Session</Link>
           </Button>
         </div>
       ) : (
@@ -68,11 +68,11 @@ export default async function AdminSessionsPage() {
             <thead className="bg-muted/50">
               <tr>
                 <th className="text-left p-3 font-medium">Session</th>
-                <th className="text-left p-3 font-medium">Datum</th>
-                <th className="text-left p-3 font-medium">Buchungen</th>
-                <th className="text-left p-3 font-medium">Gästeliste</th>
+                <th className="text-left p-3 font-medium">Date</th>
+                <th className="text-left p-3 font-medium">Bookings</th>
+                <th className="text-left p-3 font-medium">Guest List</th>
                 <th className="text-left p-3 font-medium">Status</th>
-                <th className="text-right p-3 font-medium">Aktionen</th>
+                <th className="text-right p-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -90,7 +90,7 @@ export default async function AdminSessionsPage() {
                     </td>
                     <td className="p-3">
                       <div>
-                        <p>{date.toLocaleDateString('de-DE')}</p>
+                        <p>{date.toLocaleDateString('en-US')}</p>
                         <p className="text-muted-foreground">{session.startTime} - {session.endTime}</p>
                       </div>
                     </td>
@@ -103,13 +103,13 @@ export default async function AdminSessionsPage() {
                     </td>
                     <td className="p-3">
                       {session.isCancelled ? (
-                        <Badge variant="destructive">Abgesagt</Badge>
+                        <Badge variant="destructive">Cancelled</Badge>
                       ) : !session.isPublished ? (
-                        <Badge variant="secondary">Entwurf</Badge>
+                        <Badge variant="secondary">Draft</Badge>
                       ) : isPast ? (
-                        <Badge variant="outline">Vergangen</Badge>
+                        <Badge variant="outline">Past</Badge>
                       ) : (
-                        <Badge>Aktiv</Badge>
+                        <Badge>Active</Badge>
                       )}
                     </td>
                     <td className="p-3 text-right">

@@ -11,12 +11,14 @@ import { signOut } from '@/lib/auth-client';
 const navItems = [
   { href: '/admin', label: 'Dashboard', exact: true },
   { href: '/admin/sessions', label: 'Sessions' },
-  { href: '/admin/bookings', label: 'Buchungen' },
+  { href: '/admin/bookings', label: 'Bookings' },
   { href: '/admin/cards', label: 'Black Cards' },
-  { href: '/admin/gl-tickets', label: 'Gästeliste' },
+  { href: '/admin/gl-tickets', label: 'Guest List' },
   { href: '/admin/check-in', label: 'Check-in' },
-  { href: '/admin/inquiries', label: 'Anfragen' },
-  { href: '/admin/applications', label: 'Bewerbungen' },
+  { href: '/admin/inquiries', label: 'Inquiries' },
+  { href: '/admin/applications', label: 'Applications' },
+  { href: '/admin/slots', label: 'Recording Slots' },
+  { href: '/admin/settings', label: 'Einstellungen' },
 ];
 
 function MenuIcon({ className }: { className?: string }) {
@@ -88,7 +90,7 @@ export function AdminSidebar() {
           className="w-full justify-start text-xs"
           onClick={handleSignOut}
         >
-          Abmelden
+          Sign Out
         </Button>
       </div>
     </>

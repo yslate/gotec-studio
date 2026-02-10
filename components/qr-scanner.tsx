@@ -56,7 +56,7 @@ export function QrScanner({ onScan, onError }: QrScannerProps) {
     } catch (err) {
       console.error('Failed to start scanner:', err);
       setHasPermission(false);
-      onError?.('Kamera-Zugriff verweigert oder nicht verfügbar');
+      onError?.('Camera access denied or unavailable');
     }
   }
 
@@ -82,7 +82,7 @@ export function QrScanner({ onScan, onError }: QrScannerProps) {
 
       {hasPermission === false && (
         <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20">
-          Kamera-Zugriff wurde verweigert. Bitte erlaube den Zugriff in den Browser-Einstellungen.
+          Camera access was denied. Please allow access in your browser settings.
         </div>
       )}
 
@@ -95,12 +95,12 @@ export function QrScanner({ onScan, onError }: QrScannerProps) {
         {isScanning ? (
           <>
             <CameraOffIcon className="w-4 h-4 mr-2" />
-            Scanner stoppen
+            Stop Scanner
           </>
         ) : (
           <>
             <CameraIcon className="w-4 h-4 mr-2" />
-            QR-Scanner starten
+            Start QR Scanner
           </>
         )}
       </Button>

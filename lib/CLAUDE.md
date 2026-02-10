@@ -9,4 +9,11 @@
 |----|------|---|-------|------|
 | #4123 | 7:05 PM | 🔵 | Better Auth configuration with role field and default staff assignment | ~369 |
 | #4120 | " | 🔵 | Admin authentication middleware with role-based access control | ~287 |
+
+### Feb 10, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #4622 | 8:29 PM | 🔵 | Validation schemas define bulk GL ticket creation structure | ~285 |
+| #4614 | 8:28 PM | 🔵 | Email system includes sendGLTicket function for individual tickets | ~332 |
 </claude-mem-context>

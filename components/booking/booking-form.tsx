@@ -44,7 +44,7 @@ export function BookingForm({
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<{ message: string; status: string } | null>(null);
 
-  const formattedDate = new Date(date).toLocaleDateString('de-DE', {
+  const formattedDate = new Date(date).toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -94,7 +94,7 @@ export function BookingForm({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Verifizierung fehlgeschlagen');
+        setError(data.error || 'Verification failed');
         setLoading(false);
         return;
       }
@@ -103,7 +103,7 @@ export function BookingForm({
       setExpiresAt(new Date(data.expiresAt));
       setStep('verification');
     } catch {
-      setError('Ein Fehler ist aufgetreten');
+      setError('An error occurred');
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export function BookingForm({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Verifizierung fehlgeschlagen');
+        setError(data.error || 'Verification failed');
         setLoading(false);
         return;
       }
@@ -139,7 +139,7 @@ export function BookingForm({
       });
       setStep('success');
     } catch {
-      setError('Ein Fehler ist aufgetreten');
+      setError('An error occurred');
     } finally {
       setLoading(false);
     }
@@ -158,7 +158,7 @@ export function BookingForm({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {success.status === 'confirmed' ? 'Buchung bestätigt!' : 'Auf der Warteliste'}
+            {success.status === 'confirmed' ? 'Booking confirmed!' : 'On the waitlist'}
           </CardTitle>
           <CardDescription>{success.message}</CardDescription>
         </CardHeader>
@@ -166,26 +166,26 @@ export function BookingForm({
           <div className="p-4 border bg-muted/30 space-y-2 text-xs">
             <p><span className="font-medium">Session:</span> {sessionTitle}</p>
             <p><span className="font-medium">Artist:</span> {artistName}</p>
-            <p><span className="font-medium">Datum:</span> {formattedDate}</p>
-            <p><span className="font-medium">Uhrzeit:</span> {startTime} - {endTime}</p>
+            <p><span className="font-medium">Date:</span> {formattedDate}</p>
+            <p><span className="font-medium">Time:</span> {startTime} - {endTime}</p>
             <p><span className="font-medium">Name:</span> {guestName}</p>
-            <p><span className="font-medium">Karte:</span> {cardCode}</p>
+            <p><span className="font-medium">Card:</span> {cardCode}</p>
           </div>
 
           <div className="p-3 border border-primary/30 bg-primary/5 text-xs">
-            <p className="font-medium text-primary">Bestätigung per E-Mail</p>
+            <p className="font-medium text-primary">Email Confirmation</p>
             <p className="text-muted-foreground mt-1">
-              Eine Bestätigungs-E-Mail wurde an <strong>{guestEmail}</strong> gesendet.
-              Prüfe auch deinen Spam-Ordner.
+              A confirmation email has been sent to <strong>{guestEmail}</strong>.
+              Please also check your spam folder.
             </p>
           </div>
 
           <div className="flex gap-2">
             <Button onClick={() => router.push('/')} variant="outline" className="flex-1">
-              Zurück zur Übersicht
+              Back to Overview
             </Button>
             <Button onClick={() => router.push('/my-bookings')} className="flex-1">
-              Meine Buchungen
+              My Bookings
             </Button>
           </div>
         </CardContent>
@@ -200,9 +200,9 @@ export function BookingForm({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">E-Mail bestätigen</CardTitle>
+          <CardTitle className="text-base">Confirm Email</CardTitle>
           <CardDescription>
-            Ein 6-stelliger Code wurde an <strong>{guestEmail}</strong> gesendet
+            A 6-digit code has been sent to <strong>{guestEmail}</strong>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -215,13 +215,13 @@ export function BookingForm({
 
             {isExpired && (
               <div className="text-destructive text-xs p-2 border border-destructive/50 bg-destructive/10">
-                Code abgelaufen. Bitte fordere einen neuen Code an.
+                Code expired. Please request a new code.
               </div>
             )}
 
             <div className="space-y-2">
               <label htmlFor="verificationCode" className="text-xs font-medium">
-                Bestätigungscode
+                Verification Code
               </label>
               <Input
                 id="verificationCode"
@@ -237,7 +237,7 @@ export function BookingForm({
                 autoFocus
               />
               <p className="text-xs text-muted-foreground text-center">
-                Prüfe auch deinen Spam-Ordner
+                Also check your spam folder
               </p>
             </div>
 
@@ -248,14 +248,14 @@ export function BookingForm({
                 onClick={handleResendCode}
                 className="flex-1"
               >
-                Neuen Code anfordern
+                Request New Code
               </Button>
               <Button
                 type="submit"
                 className="flex-1"
                 disabled={loading || verificationCode.length !== 6 || isExpired}
               >
-                {loading ? 'Prüfe...' : 'Bestätigen'}
+                {loading ? 'Verifying...' : 'Confirm'}
               </Button>
             </div>
           </form>
@@ -295,13 +295,13 @@ export function BookingForm({
               required
             />
             <p className="text-xs text-muted-foreground">
-              Der Code steht auf deiner Black Card (z.B. BC-X7K9M2)
+              The code is on your Black Card (e.g. BC-X7K9M2)
             </p>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="guestName" className="text-xs font-medium">
-              Dein Name *
+              Your Name *
             </label>
             <Input
               id="guestName"
@@ -315,7 +315,7 @@ export function BookingForm({
 
           <div className="space-y-2">
             <label htmlFor="guestEmail" className="text-xs font-medium">
-              E-Mail Adresse *
+              Email Address *
             </label>
             <Input
               id="guestEmail"
@@ -326,13 +326,13 @@ export function BookingForm({
               required
             />
             <p className="text-xs text-muted-foreground">
-              Ein Bestätigungscode wird an diese Adresse gesendet
+              A verification code will be sent to this address
             </p>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="guestPhone" className="text-xs font-medium">
-              Telefonnummer (optional)
+              Phone Number (optional)
             </label>
             <Input
               id="guestPhone"
@@ -344,7 +344,7 @@ export function BookingForm({
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Sende Code...' : 'Bestätigungscode anfordern'}
+            {loading ? 'Sending code...' : 'Request Verification Code'}
           </Button>
         </form>
       </CardContent>

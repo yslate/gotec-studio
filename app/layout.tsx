@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     default: "GOTEC Records",
     template: "%s | GOTEC Records",
   },
-  description: "Recording Sessions Booking - Buche deinen Platz bei exklusiven Recording Sessions im GOTEC DJ-Studio Karlsruhe",
+  description: "Recording Sessions Booking - Book your spot at exclusive recording sessions at GOTEC DJ Studio Karlsruhe",
   keywords: ["GOTEC", "Records", "DJ", "Studio", "Karlsruhe", "Recording", "Booking"],
   authors: [{ name: "GOTEC Records" }],
   openGraph: {
     title: "GOTEC Records",
-    description: "Recording Sessions Booking - Buche deinen Platz bei exklusiven Recording Sessions",
+    description: "Recording Sessions Booking - Book your spot at exclusive recording sessions",
     type: "website",
-    locale: "de_DE",
+    locale: "en_US",
   },
 };
 
@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className={`${jetbrainsMono.variable} dark`}>
+    <html lang="en" className={`${jetbrainsMono.variable} dark`}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

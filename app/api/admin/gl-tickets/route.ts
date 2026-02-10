@@ -3,13 +3,11 @@ import { db, guestListTickets, recordingSessions } from '@/db';
 import { eq, sql, desc } from 'drizzle-orm';
 import { getAdminSession } from '@/lib/admin-auth';
 import { createGLTicketSchema, createBulkGLTicketsSchema } from '@/lib/validations';
-import { nanoid } from 'nanoid';
 import { sendGLTicket } from '@/lib/email';
+import { generateTicketCode } from '@/lib/ticket-utils';
+import QRCode from 'qrcode';
 
-// Generate a unique QR code
-function generateTicketCode(): string {
-  return `GL-${nanoid(8).toUpperCase()}`;
-}
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 // GET /api/admin/gl-tickets - Get all GL tickets
 export async function GET(request: NextRequest) {
@@ -81,7 +79,7 @@ export async function POST(request: NextRequest) {
 
       if (!validationResult.success) {
         return NextResponse.json(
-          { error: 'Ungültige Daten', details: validationResult.error.flatten() },
+          { error: 'Invalid data', details: validationResult.error.flatten() },
           { status: 400 }
         );
       }
@@ -108,7 +106,7 @@ export async function POST(request: NextRequest) {
 
       if (tickets.length > available) {
         return NextResponse.json(
-          { error: `Nur noch ${available} Gästelisten-Plätze verfügbar` },
+          { error: `Only ${available} guest list spots remaining` },
           { status: 400 }
         );
       }
@@ -128,21 +126,24 @@ export async function POST(request: NextRequest) {
         .values(ticketValues)
         .returning();
 
-      // Send emails for tickets with email addresses (async, don't wait)
+      // Send emails with QR codes (async, don't wait)
       const sessionInfo = sessionData[0];
       for (const ticket of newTickets) {
         if (ticket.guestEmail) {
-          sendGLTicket({
-            to: ticket.guestEmail,
-            guestName: ticket.guestName,
-            sessionTitle: sessionInfo.title,
-            artistName: sessionInfo.artistName,
-            date: sessionInfo.date,
-            startTime: sessionInfo.startTime,
-            endTime: sessionInfo.endTime,
-            ticketCode: ticket.code,
-            allocatedBy: ticket.allocatedBy || undefined,
-          }).catch(err => console.error('[API] GL ticket email failed:', err));
+          QRCode.toDataURL(`${APP_URL}/gl/${ticket.code}`, { width: 200, margin: 1 })
+            .then(qrDataUrl => sendGLTicket({
+              to: ticket.guestEmail,
+              guestName: ticket.guestName,
+              sessionTitle: sessionInfo.title,
+              artistName: sessionInfo.artistName,
+              date: sessionInfo.date,
+              startTime: sessionInfo.startTime,
+              endTime: sessionInfo.endTime,
+              ticketCode: ticket.code,
+              allocatedBy: ticket.allocatedBy || undefined,
+              qrDataUrl,
+            }))
+            .catch(err => console.error('[API] GL ticket email failed:', err));
         }
       }
 
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Ungültige Daten', details: validationResult.error.flatten() },
+        { error: 'Invalid data', details: validationResult.error.flatten() },
         { status: 400 }
       );
     }
@@ -179,7 +180,7 @@ export async function POST(request: NextRequest) {
 
     if ((currentCount[0]?.count || 0) >= sessionData[0].maxGuestList) {
       return NextResponse.json(
-        { error: 'Gästeliste ist voll' },
+        { error: 'Guest list is full' },
         { status: 400 }
       );
     }
@@ -198,20 +199,23 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    // Send email (guestEmail is now required)
+    // Send email with QR code (guestEmail is now required)
     if (guestEmail) {
       const sessionInfo = sessionData[0];
-      sendGLTicket({
-        to: guestEmail,
-        guestName,
-        sessionTitle: sessionInfo.title,
-        artistName: sessionInfo.artistName,
-        date: sessionInfo.date,
-        startTime: sessionInfo.startTime,
-        endTime: sessionInfo.endTime,
-        ticketCode,
-        allocatedBy: allocatedBy || undefined,
-      }).catch(err => console.error('[API] GL ticket email failed:', err));
+      QRCode.toDataURL(`${APP_URL}/gl/${ticketCode}`, { width: 200, margin: 1 })
+        .then(qrDataUrl => sendGLTicket({
+          to: guestEmail,
+          guestName,
+          sessionTitle: sessionInfo.title,
+          artistName: sessionInfo.artistName,
+          date: sessionInfo.date,
+          startTime: sessionInfo.startTime,
+          endTime: sessionInfo.endTime,
+          ticketCode,
+          allocatedBy: allocatedBy || undefined,
+          qrDataUrl,
+        }))
+        .catch(err => console.error('[API] GL ticket email failed:', err));
     }
 
     return NextResponse.json(newTicket[0]);

@@ -15,7 +15,7 @@ export function SessionActions({ sessionId, isPast }: SessionActionsProps) {
   const [resetting, setResetting] = useState(false);
 
   async function handleReset() {
-    if (!confirm('Session zurücksetzen?\n\nDies markiert alle nicht eingecheckten Gäste als No-Show und setzt GL-Tickets auf abgelaufen.')) {
+    if (!confirm('Reset session?\n\nThis marks all non-checked-in guests as no-show and expires GL tickets.')) {
       return;
     }
 
@@ -29,13 +29,13 @@ export function SessionActions({ sessionId, isPast }: SessionActionsProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || 'Fehler beim Zurücksetzen');
+        alert(data.error || 'Error resetting session');
       } else {
-        alert(`Session zurückgesetzt!\n\n${data.stats.noShows} No-Shows markiert\n${data.stats.expiredTickets} GL-Tickets abgelaufen`);
+        alert(`Session reset!\n\n${data.stats.noShows} no-shows marked\n${data.stats.expiredTickets} GL tickets expired`);
         router.refresh();
       }
     } catch {
-      alert('Ein Fehler ist aufgetreten');
+      alert('An error occurred');
     } finally {
       setResetting(false);
     }
@@ -54,7 +54,7 @@ export function SessionActions({ sessionId, isPast }: SessionActionsProps) {
         </Button>
       )}
       <Button asChild variant="ghost" size="xs">
-        <Link href={`/admin/sessions/${sessionId}`}>Bearbeiten</Link>
+        <Link href={`/admin/sessions/${sessionId}`}>Edit</Link>
       </Button>
     </div>
   );

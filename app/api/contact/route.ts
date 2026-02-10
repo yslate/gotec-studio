@@ -8,14 +8,14 @@ export async function POST(request: NextRequest) {
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
-        { error: 'Alle Pflichtfelder müssen ausgefüllt werden' },
+        { error: 'All required fields must be filled out' },
         { status: 400 }
       );
     }
 
     if (typeof email !== 'string' || !email.includes('@')) {
       return NextResponse.json(
-        { error: 'Ungültige E-Mail-Adresse' },
+        { error: 'Invalid email address' },
         { status: 400 }
       );
     }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Failed to save contact inquiry:', error);
     return NextResponse.json(
-      { error: 'Fehler beim Speichern der Anfrage' },
+      { error: 'Failed to save inquiry' },
       { status: 500 }
     );
   }

@@ -6,14 +6,14 @@ const phoneRegex = /^(\+49|0)[1-9]\d{6,14}$/;
 export const phoneSchema = z.string()
   .transform(val => val.replace(/\s/g, '')) // Remove spaces
   .refine(val => phoneRegex.test(val), {
-    message: 'Ungültige Telefonnummer',
+    message: 'Invalid phone number',
   });
 
 // Optional phone schema
 export const optionalPhoneSchema = z.string()
   .transform(val => val.replace(/\s/g, ''))
   .refine(val => val === '' || phoneRegex.test(val), {
-    message: 'Ungültige Telefonnummer',
+    message: 'Invalid phone number',
   })
   .optional();
 
@@ -23,7 +23,7 @@ const cardCodeRegex = /^BC-[A-Z0-9]{6}$/;
 export const cardCodeSchema = z.string()
   .transform(val => val.toUpperCase().trim())
   .refine(val => cardCodeRegex.test(val), {
-    message: 'Ungültiger Kartencode (Format: BC-XXXXXX)',
+    message: 'Invalid card code (format: BC-XXXXXX)',
   });
 
 // Step 1: Request verification code
@@ -31,14 +31,14 @@ export const requestVerificationSchema = z.object({
   sessionId: z.string().uuid(),
   cardCode: cardCodeSchema,
   guestName: z.string().min(2).max(255),
-  guestEmail: z.string().email({ message: 'Ungültige E-Mail-Adresse' }),
+  guestEmail: z.string().email({ message: 'Invalid email address' }),
   guestPhone: optionalPhoneSchema,
 });
 
 // Step 2: Verify email and complete booking
 export const verifyAndBookSchema = z.object({
   verificationId: z.string().uuid(),
-  code: z.string().length(6, { message: 'Bestätigungscode muss 6 Zeichen haben' }),
+  code: z.string().length(6, { message: 'Verification code must be 6 characters' }),
 });
 
 // Legacy: Direct booking (for backwards compatibility)
@@ -46,18 +46,18 @@ export const createBookingSchema = z.object({
   sessionId: z.string().uuid(),
   cardNumber: z.number().min(1).max(100),
   guestName: z.string().min(2).max(255),
-  guestEmail: z.string().email({ message: 'Ungültige E-Mail-Adresse' }),
+  guestEmail: z.string().email({ message: 'Invalid email address' }),
   guestPhone: optionalPhoneSchema,
 });
 
 // Cancel and lookup now use email instead of phone
 export const cancelBookingSchema = z.object({
   bookingId: z.string().uuid(),
-  email: z.string().email({ message: 'Ungültige E-Mail-Adresse' }),
+  email: z.string().email({ message: 'Invalid email address' }),
 });
 
 export const lookupBookingsSchema = z.object({
-  email: z.string().email({ message: 'Ungültige E-Mail-Adresse' }),
+  email: z.string().email({ message: 'Invalid email address' }),
 });
 
 // Session schemas
@@ -94,7 +94,7 @@ export const lockCardSchema = z.object({
 export const createGLTicketSchema = z.object({
   sessionId: z.string().uuid(),
   guestName: z.string().min(2).max(255),
-  guestEmail: z.string().email({ message: 'Ungültige E-Mail-Adresse' }),
+  guestEmail: z.string().email({ message: 'Invalid email address' }),
   guestPhone: optionalPhoneSchema,
   allocatedBy: z.string().max(255).optional(),
 });
@@ -103,11 +103,20 @@ export const createBulkGLTicketsSchema = z.object({
   sessionId: z.string().uuid(),
   tickets: z.array(z.object({
     guestName: z.string().min(2).max(255),
-    guestEmail: z.string().email({ message: 'Ungültige E-Mail-Adresse' }),
+    guestEmail: z.string().email({ message: 'Invalid email address' }),
     guestPhone: optionalPhoneSchema,
     allocatedBy: z.string().max(255).optional(),
   })).min(1).max(50),
 });
+
+// DJ Guest List schema
+export const sendDJGuestListSchema = z.object({
+  sessionId: z.string().uuid(),
+  djEmail: z.string().email({ message: 'Invalid email address' }),
+  ticketCount: z.number().min(1).max(30),
+});
+
+export type SendDJGuestListInput = z.infer<typeof sendDJGuestListSchema>;
 
 // Check-in schemas
 export const checkInSchema = z.object({
@@ -120,6 +129,30 @@ export const createUserSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2).max(255),
   role: z.enum(['admin', 'staff']).default('staff'),
+});
+
+// Recording Slot schemas
+export const createSlotSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/),
+});
+
+export const updateSlotSchema = createSlotSchema.partial().extend({
+  status: z.enum(['available', 'booked']).optional(),
+});
+
+// Application workflow schemas
+export const acceptApplicationSchema = z.object({
+  title: z.string().min(2).max(255),
+  description: z.string().max(2000).optional(),
+  maxCardholders: z.number().min(1).max(50).default(15),
+  maxWaitlist: z.number().min(0).max(20).default(5),
+  maxGuestList: z.number().min(0).max(30).default(10),
+});
+
+export const reassignApplicationSchema = z.object({
+  slotId: z.string().uuid(),
 });
 
 // Type exports
@@ -136,3 +169,7 @@ export type CreateGLTicketInput = z.infer<typeof createGLTicketSchema>;
 export type CreateBulkGLTicketsInput = z.infer<typeof createBulkGLTicketsSchema>;
 export type CheckInInput = z.infer<typeof checkInSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type CreateSlotInput = z.infer<typeof createSlotSchema>;
+export type UpdateSlotInput = z.infer<typeof updateSlotSchema>;
+export type AcceptApplicationInput = z.infer<typeof acceptApplicationSchema>;
+export type ReassignApplicationInput = z.infer<typeof reassignApplicationSchema>;

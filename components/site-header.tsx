@@ -5,12 +5,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useSettings } from '@/lib/use-settings';
 
-const navLinks = [
-  { href: '/sessions', label: 'Sessions' },
-  { href: '/blackcard', label: 'Black Card' },
-  { href: '/apply', label: 'Apply' },
-  { href: '/contact', label: 'Contact' },
+const navLinkDefs = [
+  { href: '/sessions', settingKey: 'nav.sessions' },
+  { href: '/library', settingKey: null, defaultLabel: 'Library' },
+  { href: '/blackcard', settingKey: 'nav.blackcard' },
+  { href: '/apply', settingKey: 'nav.apply' },
+  { href: '/contact', settingKey: 'nav.contact' },
 ];
 
 interface SiteHeaderProps {
@@ -18,6 +20,11 @@ interface SiteHeaderProps {
 }
 
 export function SiteHeader({ heroMode = false }: SiteHeaderProps) {
+  const s = useSettings(['nav.sessions', 'nav.blackcard', 'nav.apply', 'nav.contact']);
+  const navLinks = navLinkDefs.map((def) => ({
+    href: def.href,
+    label: def.settingKey ? s[def.settingKey] : def.defaultLabel!,
+  }));
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);

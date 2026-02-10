@@ -32,7 +32,7 @@ function LoginForm() {
       console.log('Sign in result:', result);
 
       if (result.error) {
-        setError(result.error.message || 'Login fehlgeschlagen');
+        setError(result.error.message || 'Login failed');
         setLoading(false);
         return;
       }
@@ -41,7 +41,7 @@ function LoginForm() {
       window.location.href = callbackUrl;
     } catch (err) {
       console.error('Sign in error:', err);
-      setError('Ein Fehler ist aufgetreten');
+      setError('An error occurred');
       setLoading(false);
     }
   }
@@ -55,7 +55,7 @@ function LoginForm() {
       )}
       <div className="space-y-2">
         <label htmlFor="email" className="text-xs font-medium">
-          E-Mail
+          Email
         </label>
         <Input
           id="email"
@@ -68,7 +68,7 @@ function LoginForm() {
       </div>
       <div className="space-y-2">
         <label htmlFor="password" className="text-xs font-medium">
-          Passwort
+          Password
         </label>
         <Input
           id="password"
@@ -79,7 +79,7 @@ function LoginForm() {
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Anmelden...' : 'Anmelden'}
+        {loading ? 'Signing in...' : 'Sign In'}
       </Button>
     </form>
   );
@@ -98,10 +98,10 @@ export default function LoginPage() {
             className="h-12 w-auto mx-auto mb-2"
             priority
           />
-          <CardDescription>Admin-Bereich Login</CardDescription>
+          <CardDescription>Admin Area Login</CardDescription>
         </CardHeader>
         <CardContent>
-          <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Laden...</div>}>
+          <Suspense fallback={<div className="text-center text-sm text-muted-foreground">Loading...</div>}>
             <LoginForm />
           </Suspense>
         </CardContent>

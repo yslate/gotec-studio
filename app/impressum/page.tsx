@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 export const metadata = {
-  title: 'Impressum',
+  title: 'Imprint',
 };
 
 export default function ImpressumPage() {
@@ -22,72 +22,74 @@ export default function ImpressumPage() {
               />
             </Link>
             <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
-              <Link href="/">Zurück</Link>
+              <Link href="/">Back</Link>
             </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-2xl font-bold mb-6">Impressum</h1>
+        <h1 className="text-3xl font-bold mb-6">Imprint</h1>
 
-        <div className="prose prose-sm prose-invert max-w-none space-y-6">
+        <div className="prose prose-invert max-w-none space-y-6">
           <section>
-            <h2 className="text-lg font-semibold mb-2">Angaben gemäß § 5 TMG</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl font-semibold mb-2">Information according to § 5 TMG</h2>
+            <p className="text-base text-foreground/80">
               GOTEC Records<br />
-              [Straße und Hausnummer]<br />
-              [PLZ] Karlsruhe<br />
-              Deutschland
+              [Street and Number]<br />
+              [Postal Code] Karlsruhe<br />
+              Germany
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2">Kontakt</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl font-semibold mb-2">Contact</h2>
+            <p className="text-base text-foreground/80">
               E-Mail: info@gotec-records.de<br />
               [Telefon: +49 XXX XXXXXXX]
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
-            <p className="text-muted-foreground">
-              [Name des Verantwortlichen]<br />
-              [Adresse]
+            <h2 className="text-xl font-semibold mb-2">Responsible for content according to § 55 Abs. 2 RStV</h2>
+            <p className="text-base text-foreground/80">
+              [Name of responsible person]<br />
+              [Address]
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2">EU-Streitschlichtung</h2>
-            <p className="text-muted-foreground">
-              Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{' '}
+            <h2 className="text-xl font-semibold mb-2">EU Dispute Resolution</h2>
+            <p className="text-base text-foreground/80 text-justify">
+              The European Commission provides a platform for online dispute resolution (ODR):
+            </p>
+            <div className="mt-3">
               <a
                 href="https://ec.europa.eu/consumers/odr/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="inline-flex items-center border px-4 py-2 text-xs text-foreground hover:border-primary/50 hover:text-primary transition-colors"
               >
-                https://ec.europa.eu/consumers/odr/
+                EU Online Dispute Resolution &rarr;
               </a>
-            </p>
-            <p className="text-muted-foreground mt-2">
-              Unsere E-Mail-Adresse finden Sie oben im Impressum.
+            </div>
+            <p className="text-base text-foreground/80 mt-3">
+              You can find our email address in the imprint above.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2">Verbraucherstreitbeilegung/Universalschlichtungsstelle</h2>
-            <p className="text-muted-foreground">
-              Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer
-              Verbraucherschlichtungsstelle teilzunehmen.
+            <h2 className="text-xl font-semibold mb-2">Consumer Dispute Resolution / Arbitration Body</h2>
+            <p className="text-base text-foreground/80 text-justify">
+              We are not willing or obligated to participate in dispute resolution proceedings before a
+              consumer arbitration body.
             </p>
           </section>
         </div>
 
         <div className="mt-8 pt-6 border-t text-xs text-muted-foreground">
           <p>
-            <strong>Hinweis:</strong> Bitte ergänze die Platzhalter [in Klammern] mit den korrekten Angaben.
+            <strong>Note:</strong> Please fill in the placeholders [in brackets] with the correct information.
           </p>
         </div>
       </main>

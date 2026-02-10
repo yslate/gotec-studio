@@ -62,12 +62,12 @@ export default function AdminCheckInPage() {
 
   const performCheckIn = useCallback(async (checkInCode: string) => {
     if (!selectedSession) {
-      setError('Bitte wähle eine Session aus');
+      setError('Please select a session');
       return;
     }
 
     if (!checkInCode.trim()) {
-      setError('Bitte gib einen Code oder Kartennummer ein');
+      setError('Please enter a code or card number');
       return;
     }
 
@@ -88,14 +88,14 @@ export default function AdminCheckInPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Check-in fehlgeschlagen');
+        setError(data.error || 'Check-in failed');
       } else {
         setResult(data);
         setRecentCheckIns(prev => [data, ...prev.slice(0, 9)]);
         setCode('');
       }
     } catch {
-      setError('Ein Fehler ist aufgetreten');
+      setError('An error occurred');
     } finally {
       setLoading(false);
     }
@@ -117,21 +117,21 @@ export default function AdminCheckInPage() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="text-lg font-semibold">Check-in</h1>
-        <p className="text-xs text-muted-foreground">Gäste einchecken via Kartennummer oder QR-Code</p>
+        <p className="text-xs text-muted-foreground">Check in guests via card number or QR code</p>
       </div>
 
       {sessions.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <p className="text-muted-foreground text-sm">Keine Sessions für heute geplant</p>
+            <p className="text-muted-foreground text-sm">No sessions scheduled for today</p>
           </CardContent>
         </Card>
       ) : (
         <>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Session auswählen</CardTitle>
-              <CardDescription>Wähle die heutige Session für den Check-in</CardDescription>
+              <CardTitle className="text-base">Select Session</CardTitle>
+              <CardDescription>Choose today's session for check-in</CardDescription>
             </CardHeader>
             <CardContent>
               <select
@@ -143,7 +143,7 @@ export default function AdminCheckInPage() {
                 }}
                 className="w-full h-8 px-2 text-xs border bg-background"
               >
-                <option value="">Session wählen...</option>
+                <option value="">Choose session...</option>
                 {sessions.map((session) => (
                   <option key={session.id} value={session.id}>
                     {session.title} - {session.artistName} ({session.startTime} - {session.endTime})
@@ -165,7 +165,7 @@ export default function AdminCheckInPage() {
                 <div className="space-y-6">
                   {/* QR Scanner */}
                   <div className="border-b pb-4">
-                    <p className="text-sm font-medium mb-3">QR-Code scannen</p>
+                    <p className="text-sm font-medium mb-3">Scan QR Code</p>
                     <QrScanner
                       onScan={handleQrScan}
                       onError={(err) => setError(err)}
@@ -174,21 +174,21 @@ export default function AdminCheckInPage() {
 
                   {/* Manual Input */}
                   <form onSubmit={handleCheckIn} className="space-y-4">
-                    <p className="text-sm font-medium">Oder manuell eingeben</p>
+                    <p className="text-sm font-medium">Or enter manually</p>
                     <div className="flex gap-2">
                       <Input
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
-                        placeholder="Kartennummer (1-100) oder Code"
+                        placeholder="Card number (1-100) or code"
                         className="flex-1 text-lg h-12"
                       />
                       <Button type="submit" disabled={loading} className="h-12 px-8">
-                        {loading ? 'Prüfe...' : 'Check-in'}
+                        {loading ? 'Checking...' : 'Check-in'}
                       </Button>
                     </div>
 
                     <p className="text-xs text-muted-foreground">
-                      Gib die Black Card Nummer (z.B. &quot;42&quot;) oder den GL-Ticket Code ein
+                      Enter the Black Card number (e.g. &quot;42&quot;) or the GL ticket code
                     </p>
                   </form>
                 </div>
@@ -203,15 +203,15 @@ export default function AdminCheckInPage() {
                   <div className="mt-4 p-4 border border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-300">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant={result.type === 'cardholder' ? 'default' : 'secondary'}>
-                        {result.type === 'cardholder' ? 'Karteninhaber' : 'Gästeliste'}
+                        {result.type === 'cardholder' ? 'Card Holder' : 'Guest List'}
                       </Badge>
                     </div>
                     <p className="text-lg font-medium">{result.message}</p>
                     {result.cardNumber && (
-                      <p className="text-sm mt-1">Karte #{result.cardNumber}</p>
+                      <p className="text-sm mt-1">Card #{result.cardNumber}</p>
                     )}
                     {result.allocatedBy && (
-                      <p className="text-sm mt-1">Eingeladen von: {result.allocatedBy}</p>
+                      <p className="text-sm mt-1">Invited by: {result.allocatedBy}</p>
                     )}
                   </div>
                 )}
@@ -222,7 +222,7 @@ export default function AdminCheckInPage() {
           {recentCheckIns.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Letzte Check-ins</CardTitle>
+                <CardTitle className="text-base">Recent Check-ins</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -230,7 +230,7 @@ export default function AdminCheckInPage() {
                     <div key={index} className="flex items-center justify-between p-2 border text-xs">
                       <div className="flex items-center gap-2">
                         <Badge variant={checkIn.type === 'cardholder' ? 'default' : 'secondary'} className="text-[10px]">
-                          {checkIn.type === 'cardholder' ? 'Karte' : 'GL'}
+                          {checkIn.type === 'cardholder' ? 'Card' : 'GL'}
                         </Badge>
                         <span className="font-medium">{checkIn.guestName}</span>
                       </div>

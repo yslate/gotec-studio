@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SiteHeader } from '@/components/site-header';
 import { Footer } from '@/components/footer';
+import { useSettings } from '@/lib/use-settings';
 
 export default function ContactPage() {
+  const s = useSettings(['contact.title', 'contact.intro', 'contact.successTitle', 'contact.successText']);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -33,12 +35,12 @@ export default function ContactPage() {
 
       if (!res.ok) {
         const body = await res.json();
-        throw new Error(body.error || 'Fehler beim Senden');
+        throw new Error(body.error || 'Failed to send');
       }
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unbekannter Fehler');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -49,29 +51,34 @@ export default function ContactPage() {
       <SiteHeader />
 
       <main className="container mx-auto px-4 py-12 sm:py-20 max-w-xl flex-1">
-        <h1 className="text-xs uppercase tracking-widest text-primary mb-6">
-          Contact
+        <h1 className="text-3xl font-bold text-primary mb-6">
+          {s['contact.title']}
         </h1>
 
-        <p className="text-sm text-muted-foreground mb-10">
-          Questions, collaborations, or feedback? Send us a message or write to{' '}
-          <a href="mailto:info@gotec-records.com" className="text-primary hover:underline">
+        <p className="text-base text-foreground/80 mb-6 text-justify">
+          {s['contact.intro']}
+        </p>
+        <div className="mb-10">
+          <a
+            href="mailto:info@gotec-records.com"
+            className="inline-flex items-center border px-5 py-2.5 text-xs uppercase tracking-widest text-foreground hover:border-primary/50 hover:text-primary transition-colors"
+          >
             info@gotec-records.com
           </a>
-        </p>
+        </div>
 
         {success ? (
           <div className="border border-primary/30 p-8 text-center">
-            <p className="text-sm text-primary font-medium mb-2">Message sent</p>
+            <p className="text-sm text-primary font-medium mb-2">{s['contact.successTitle']}</p>
             <p className="text-xs text-muted-foreground">
-              We will get back to you as soon as possible.
+              {s['contact.successText']}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-5">
               <div>
-                <label htmlFor="name" className="block text-xs text-muted-foreground mb-1.5">
+                <label htmlFor="name" className="block text-sm text-foreground/70 mb-1.5">
                   Name *
                 </label>
                 <Input
@@ -83,8 +90,8 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-xs text-muted-foreground mb-1.5">
-                  E-Mail *
+                <label htmlFor="email" className="block text-sm text-foreground/70 mb-1.5">
+                  Email *
                 </label>
                 <Input
                   id="email"
@@ -97,7 +104,7 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label htmlFor="subject" className="block text-xs text-muted-foreground mb-1.5">
+              <label htmlFor="subject" className="block text-sm text-foreground/70 mb-1.5">
                 Subject *
               </label>
               <Input
@@ -109,7 +116,7 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-xs text-muted-foreground mb-1.5">
+              <label htmlFor="message" className="block text-sm text-foreground/70 mb-1.5">
                 Message *
               </label>
               <textarea

@@ -62,7 +62,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.error || 'Fehler beim Speichern');
+        setError(data.error || 'Error saving');
         setLoading(false);
         return;
       }
@@ -70,7 +70,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
       router.push('/admin/sessions');
       router.refresh();
     } catch {
-      setError('Ein Fehler ist aufgetreten');
+      setError('An error occurred');
       setLoading(false);
     }
   }
@@ -79,7 +79,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          {mode === 'create' ? 'Neue Session erstellen' : 'Session bearbeiten'}
+          {mode === 'create' ? 'Create New Session' : 'Edit Session'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -92,7 +92,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs font-medium">Titel</label>
+              <label className="text-xs font-medium">Title</label>
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -112,7 +112,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium">Datum</label>
+              <label className="text-xs font-medium">Date</label>
               <Input
                 type="date"
                 value={formData.date}
@@ -123,7 +123,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
 
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-2">
-                <label className="text-xs font-medium">Startzeit</label>
+                <label className="text-xs font-medium">Start Time</label>
                 <Input
                   type="time"
                   value={formData.startTime}
@@ -132,7 +132,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-medium">Endzeit</label>
+                <label className="text-xs font-medium">End Time</label>
                 <Input
                   type="time"
                   value={formData.endTime}
@@ -143,7 +143,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium">Max. Karteninhaber</label>
+              <label className="text-xs font-medium">Max. Card Holders</label>
               <Input
                 type="number"
                 min="1"
@@ -154,7 +154,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium">Max. Warteliste</label>
+              <label className="text-xs font-medium">Max. Waitlist</label>
               <Input
                 type="number"
                 min="0"
@@ -165,7 +165,7 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium">Max. Gästeliste</label>
+              <label className="text-xs font-medium">Max. Guest List</label>
               <Input
                 type="number"
                 min="0"
@@ -186,28 +186,28 @@ export function SessionForm({ initialData, mode }: SessionFormProps) {
                   className="w-4 h-4"
                 />
                 <label htmlFor="isPublished" className="text-xs">
-                  Veröffentlicht (sichtbar für Buchungen)
+                  Published (visible for bookings)
                 </label>
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium">Beschreibung (optional)</label>
+            <label className="text-xs font-medium">Description (optional)</label>
             <Textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Zusätzliche Informationen zur Session..."
+              placeholder="Additional information about the session..."
               rows={3}
             />
           </div>
 
           <div className="flex gap-2">
             <Button type="submit" disabled={loading}>
-              {loading ? 'Speichere...' : mode === 'create' ? 'Session erstellen' : 'Änderungen speichern'}
+              {loading ? 'Saving...' : mode === 'create' ? 'Create Session' : 'Save Changes'}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.back()}>
-              Abbrechen
+              Cancel
             </Button>
           </div>
         </form>

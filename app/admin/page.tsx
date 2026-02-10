@@ -152,25 +152,25 @@ export default async function AdminDashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold">Dashboard</h1>
-        <p className="text-xs text-muted-foreground">Übersicht des Buchungssystems</p>
+        <p className="text-xs text-muted-foreground">Booking system overview</p>
       </div>
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">Kommende Sessions</CardDescription>
+            <CardDescription className="text-xs">Upcoming Sessions</CardDescription>
             <CardTitle className="text-2xl">{stats.upcomingSessions}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">Aktive Buchungen</CardDescription>
+            <CardDescription className="text-xs">Active Bookings</CardDescription>
             <CardTitle className="text-2xl">{stats.activeBookings}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">Karten aktiv/gesperrt</CardDescription>
+            <CardDescription className="text-xs">Cards active/locked</CardDescription>
             <CardTitle className="text-2xl">
               {stats.activeCards}
               {stats.lockedCards > 0 && (
@@ -181,7 +181,7 @@ export default async function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs">No-Shows gesamt</CardDescription>
+            <CardDescription className="text-xs">Total No-Shows</CardDescription>
             <CardTitle className="text-2xl">{stats.noShows}</CardTitle>
           </CardHeader>
         </Card>
@@ -191,7 +191,7 @@ export default async function AdminDashboardPage() {
         <Card className="border-primary/50 bg-primary/5">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Badge>Heute</Badge>
+              <Badge>Today</Badge>
               <CardTitle className="text-base">{stats.todaySession.title}</CardTitle>
             </div>
             <CardDescription>{stats.todaySession.artistName} • {stats.todaySession.startTime} - {stats.todaySession.endTime}</CardDescription>
@@ -199,25 +199,25 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 mb-4">
               <div>
-                <p className="text-xs text-muted-foreground">Gebucht</p>
+                <p className="text-xs text-muted-foreground">Booked</p>
                 <p className="text-lg font-semibold">{stats.todaySession.bookedCount}/{stats.todaySession.maxCardholders}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Eingecheckt</p>
+                <p className="text-xs text-muted-foreground">Checked In</p>
                 <p className="text-lg font-semibold">{stats.todaySession.checkedInCount}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Gästeliste</p>
+                <p className="text-xs text-muted-foreground">Guest List</p>
                 <p className="text-lg font-semibold">{stats.todaySession.guestListCount}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">GL eingecheckt</p>
+                <p className="text-xs text-muted-foreground">GL checked in</p>
                 <p className="text-lg font-semibold">{stats.todaySession.guestListUsedCount}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button asChild size="sm">
-                <Link href="/admin/check-in">Zum Check-in</Link>
+                <Link href="/admin/check-in">Go to Check-in</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href={`/admin/sessions/${stats.todaySession.id}`}>Details</Link>
@@ -229,19 +229,19 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">Nächste Session</Badge>
+              <Badge variant="secondary">Next Session</Badge>
               <CardTitle className="text-base">{stats.nextSession.title}</CardTitle>
             </div>
             <CardDescription>
-              {stats.nextSession.artistName} • {new Date(stats.nextSession.date).toLocaleDateString('de-DE')} • {stats.nextSession.startTime}
+              {stats.nextSession.artistName} • {new Date(stats.nextSession.date).toLocaleDateString('en-US')} • {stats.nextSession.startTime}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              {stats.nextSession.bookedCount}/{stats.nextSession.maxCardholders} Buchungen
+              {stats.nextSession.bookedCount}/{stats.nextSession.maxCardholders} bookings
             </p>
             <Button asChild variant="outline" size="sm">
-              <Link href={`/admin/sessions/${stats.nextSession.id}`}>Details ansehen</Link>
+              <Link href={`/admin/sessions/${stats.nextSession.id}`}>View Details</Link>
             </Button>
           </CardContent>
         </Card>
@@ -250,11 +250,11 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Letzte Buchungen</CardTitle>
+            <CardTitle className="text-base">Recent Bookings</CardTitle>
           </CardHeader>
           <CardContent>
             {stats.recentBookings.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Keine Buchungen vorhanden</p>
+              <p className="text-sm text-muted-foreground">No bookings yet</p>
             ) : (
               <div className="space-y-2">
                 {stats.recentBookings.map((booking) => (
@@ -264,9 +264,9 @@ export default async function AdminDashboardPage() {
                       <p className="text-xs text-muted-foreground">{booking.sessionTitle}</p>
                     </div>
                     <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'} className="text-xs">
-                      {booking.status === 'confirmed' ? 'Bestätigt' :
-                       booking.status === 'waitlist' ? 'Warteliste' :
-                       booking.status === 'checked_in' ? 'Eingecheckt' : booking.status}
+                      {booking.status === 'confirmed' ? 'Confirmed' :
+                       booking.status === 'waitlist' ? 'Waitlist' :
+                       booking.status === 'checked_in' ? 'Checked In' : booking.status}
                     </Badge>
                   </div>
                 ))}
@@ -277,21 +277,21 @@ export default async function AdminDashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Schnellaktionen</CardTitle>
+            <CardTitle className="text-base">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
-              <Link href="/admin/sessions/new">+ Neue Session erstellen</Link>
+              <Link href="/admin/sessions/new">+ Create New Session</Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
-              <Link href="/admin/gl-tickets">GL-Tickets erstellen</Link>
+              <Link href="/admin/gl-tickets">Create GL Tickets</Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
-              <Link href="/admin/cards">Karten verwalten</Link>
+              <Link href="/admin/cards">Manage Cards</Link>
             </Button>
             {stats.lockedCards > 0 && (
               <Button asChild variant="outline" size="sm" className="w-full justify-start text-destructive">
-                <Link href="/admin/cards">{stats.lockedCards} gesperrte Karte(n) prüfen</Link>
+                <Link href="/admin/cards">{stats.lockedCards} locked card(s) to review</Link>
               </Button>
             )}
           </CardContent>

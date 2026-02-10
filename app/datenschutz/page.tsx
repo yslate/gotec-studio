@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 export const metadata = {
-  title: 'Datenschutz',
+  title: 'Privacy Policy',
 };
 
 export default function DatenschutzPage() {
@@ -22,123 +22,124 @@ export default function DatenschutzPage() {
               />
             </Link>
             <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
-              <Link href="/">Zurück</Link>
+              <Link href="/">Back</Link>
             </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-2xl font-bold mb-6">Datenschutzerklärung</h1>
+        <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
 
-        <div className="prose prose-sm prose-invert max-w-none space-y-6 text-muted-foreground">
+        <div className="prose prose-invert max-w-none space-y-6 text-base text-foreground/80">
           <section>
-            <h2 className="text-lg font-semibold mb-2 text-foreground">1. Datenschutz auf einen Blick</h2>
-            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">Allgemeine Hinweise</h3>
-            <p>
-              Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen
-              Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit
-              denen Sie persönlich identifiziert werden können.
+            <h2 className="text-xl font-semibold mb-2 text-foreground">1. Privacy at a Glance</h2>
+            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">General Information</h3>
+            <p className="text-justify">
+              The following information provides a simple overview of what happens to your personal
+              data when you visit this website. Personal data is any data that can be used to
+              personally identify you.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2 text-foreground">2. Datenerfassung auf dieser Website</h2>
+            <h2 className="text-xl font-semibold mb-2 text-foreground">2. Data Collection on This Website</h2>
 
-            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">Wer ist verantwortlich für die Datenerfassung?</h3>
-            <p>
-              Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten
-              können Sie dem Impressum dieser Website entnehmen.
+            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">Who is responsible for data collection?</h3>
+            <p className="text-justify">
+              Data processing on this website is carried out by the website operator. You can find
+              their contact details in the imprint of this website.
             </p>
 
-            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">Wie erfassen wir Ihre Daten?</h3>
-            <p>
-              Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei kann es sich
-              z.B. um Daten handeln, die Sie in ein Buchungsformular eingeben.
+            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">How do we collect your data?</h3>
+            <p className="text-justify">
+              Your data is collected in part by you providing it to us. This may include data that
+              you enter into a booking form, for example.
             </p>
-            <p className="mt-2">
-              Andere Daten werden automatisch oder nach Ihrer Einwilligung beim Besuch der Website durch unsere
-              IT-Systeme erfasst. Das sind vor allem technische Daten (z.B. Internetbrowser, Betriebssystem oder
-              Uhrzeit des Seitenaufrufs).
+            <p className="mt-2 text-justify">
+              Other data is collected automatically or with your consent when you visit the website
+              by our IT systems. This is primarily technical data (e.g. internet browser, operating
+              system, or time of page access).
             </p>
 
-            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">Wofür nutzen wir Ihre Daten?</h3>
-            <p>
-              Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung der Website zu gewährleisten.
-              Andere Daten können zur Analyse Ihres Nutzerverhaltens verwendet werden. Bei Buchungen werden Ihre
-              Daten zur Durchführung und Verwaltung der Buchung verwendet.
+            <h3 className="text-base font-medium mt-4 mb-2 text-foreground">What do we use your data for?</h3>
+            <p className="text-justify">
+              Some of the data is collected to ensure the error-free provision of the website. Other
+              data may be used to analyze your user behavior. When making bookings, your data is used
+              to process and manage the booking.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2 text-foreground">3. Buchungssystem</h2>
-            <p>
-              Bei der Buchung einer Recording Session erfassen wir folgende Daten:
+            <h2 className="text-xl font-semibold mb-2 text-foreground">3. Booking System</h2>
+            <p className="text-justify">
+              When booking a recording session, we collect the following data:
             </p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Name</li>
-              <li>E-Mail-Adresse</li>
-              <li>Telefonnummer (optional)</li>
+              <li>Email address</li>
+              <li>Phone number (optional)</li>
               <li>Black Card Code</li>
             </ul>
-            <p className="mt-2">
-              Diese Daten werden zur Durchführung der Buchung, zur Verifizierung Ihrer Identität und zur
-              Kommunikation bezüglich der Session verwendet. Die Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO
-              (Vertragserfüllung).
+            <p className="mt-2 text-justify">
+              This data is used to process the booking, verify your identity, and communicate
+              regarding the session. The legal basis is Art. 6(1)(b) GDPR (performance of a
+              contract).
             </p>
-            <p className="mt-2">
-              Ihre Buchungsdaten werden für die Dauer der Session-Planung und bis zu 30 Tage nach der Session
-              gespeichert, sofern keine längere Aufbewahrung aus rechtlichen Gründen erforderlich ist.
+            <p className="mt-2 text-justify">
+              Your booking data is stored for the duration of session planning and up to 30 days
+              after the session, unless a longer retention period is required for legal reasons.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2 text-foreground">4. E-Mail-Versand</h2>
-            <p>
-              Wir verwenden Postmark für den Versand von E-Mails (Buchungsbestätigungen, Verifizierungscodes).
-              Postmark verarbeitet Ihre E-Mail-Adresse in unserem Auftrag. Weitere Informationen finden Sie in
-              der Datenschutzerklärung von Postmark:{' '}
+            <h2 className="text-xl font-semibold mb-2 text-foreground">4. Email Sending</h2>
+            <p className="text-justify">
+              We use Postmark for sending emails (booking confirmations, verification codes).
+              Postmark processes your email address on our behalf.
+            </p>
+            <div className="mt-3">
               <a
                 href="https://postmarkapp.com/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="inline-flex items-center border px-4 py-2 text-xs text-foreground hover:border-primary/50 hover:text-primary transition-colors"
               >
-                https://postmarkapp.com/privacy-policy
+                Postmark Privacy Policy &rarr;
               </a>
-            </p>
+            </div>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2 text-foreground">5. Ihre Rechte</h2>
-            <p>Sie haben folgende Rechte bezüglich Ihrer personenbezogenen Daten:</p>
+            <h2 className="text-xl font-semibold mb-2 text-foreground">5. Your Rights</h2>
+            <p>You have the following rights regarding your personal data:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Recht auf Auskunft (Art. 15 DSGVO)</li>
-              <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
-              <li>Recht auf Löschung (Art. 17 DSGVO)</li>
-              <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-              <li>Recht auf Datenübertragbarkeit (Art. 20 DSGVO)</li>
-              <li>Recht auf Widerspruch (Art. 21 DSGVO)</li>
+              <li>Right of access (Art. 15 GDPR)</li>
+              <li>Right to rectification (Art. 16 GDPR)</li>
+              <li>Right to erasure (Art. 17 GDPR)</li>
+              <li>Right to restriction of processing (Art. 18 GDPR)</li>
+              <li>Right to data portability (Art. 20 GDPR)</li>
+              <li>Right to object (Art. 21 GDPR)</li>
             </ul>
-            <p className="mt-2">
-              Zur Ausübung dieser Rechte wenden Sie sich bitte an die im Impressum genannte Kontaktadresse.
+            <p className="mt-2 text-justify">
+              To exercise these rights, please contact us using the contact details provided in the imprint.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold mb-2 text-foreground">6. Hosting</h2>
-            <p>
-              Diese Website wird bei einem externen Dienstleister gehostet. Die personenbezogenen Daten, die auf
-              dieser Website erfasst werden, werden auf den Servern des Hosters gespeichert. Hierbei kann es sich
-              v.a. um IP-Adressen, Kontaktanfragen, Meta- und Kommunikationsdaten, Vertragsdaten, Kontaktdaten,
-              Namen, Websitezugriffe und sonstige Daten, die über eine Website generiert werden, handeln.
+            <h2 className="text-xl font-semibold mb-2 text-foreground">6. Hosting</h2>
+            <p className="text-justify">
+              This website is hosted by an external service provider. The personal data collected on
+              this website is stored on the servers of the host. This may include IP addresses,
+              contact requests, meta and communication data, contract data, contact details, names,
+              website access logs, and other data generated through a website.
             </p>
           </section>
         </div>
 
         <div className="mt-8 pt-6 border-t">
           <p className="text-xs text-muted-foreground">
-            Stand: Januar 2026
+            Last updated: January 2026
           </p>
         </div>
       </main>

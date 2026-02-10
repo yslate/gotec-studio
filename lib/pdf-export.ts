@@ -65,11 +65,11 @@ export function generateCheckInListPDF(
   doc.setFont('helvetica', 'normal');
   doc.text(`Artist: ${session.artistName}`, 14, 49);
   doc.text(
-    `Datum: ${new Date(session.date).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}`,
+    `Date: ${new Date(session.date).toLocaleDateString('en-US', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}`,
     14,
     55
   );
-  doc.text(`Zeit: ${session.startTime} - ${session.endTime} Uhr`, 14, 61);
+  doc.text(`Time: ${session.startTime} - ${session.endTime}`, 14, 61);
 
   // Stats
   const confirmedCount = bookings.filter(b => b.status === 'confirmed').length;
@@ -78,7 +78,7 @@ export function generateCheckInListPDF(
 
   doc.setFont('helvetica', 'bold');
   doc.text(
-    `Bestätigt: ${confirmedCount} | Warteliste: ${waitlistCount} | Gästeliste: ${glCount}`,
+    `Confirmed: ${confirmedCount} | Waitlist: ${waitlistCount} | Guest List: ${glCount}`,
     14,
     70
   );
@@ -89,21 +89,21 @@ export function generateCheckInListPDF(
   if (bookings.length > 0) {
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('Black Card Buchungen', 14, yPosition);
+    doc.text('Black Card Bookings', 14, yPosition);
     yPosition += 6;
 
     const bookingRows = bookings.map(b => [
       `#${b.cardNumber}`,
       b.guestName,
       b.phone || '-',
-      b.status === 'confirmed' ? 'Bestätigt' :
-      b.status === 'waitlist' ? 'Warteliste' :
-      b.status === 'checked_in' ? 'Eingecheckt' : b.status,
+      b.status === 'confirmed' ? 'Confirmed' :
+      b.status === 'waitlist' ? 'Waitlist' :
+      b.status === 'checked_in' ? 'Checked In' : b.status,
       '' // Checkbox column
     ]);
 
     doc.autoTable({
-      head: [['Karte', 'Name', 'Telefon', 'Status', 'Check-in']],
+      head: [['Card', 'Name', 'Phone', 'Status', 'Check-in']],
       body: bookingRows,
       startY: yPosition,
       theme: 'grid',
@@ -128,20 +128,20 @@ export function generateCheckInListPDF(
 
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('Gästeliste', 14, yPosition);
+    doc.text('Guest List', 14, yPosition);
     yPosition += 6;
 
     const glRows = guestList.map(g => [
       g.code,
       g.guestName || '-',
       g.allocatedBy || '-',
-      g.status === 'valid' ? 'Gültig' :
-      g.status === 'used' ? 'Verwendet' : g.status,
+      g.status === 'valid' ? 'Valid' :
+      g.status === 'used' ? 'Used' : g.status,
       '' // Checkbox column
     ]);
 
     doc.autoTable({
-      head: [['Code', 'Name', 'Eingeladen von', 'Status', 'Check-in']],
+      head: [['Code', 'Name', 'Invited by', 'Status', 'Check-in']],
       body: glRows,
       startY: yPosition,
       theme: 'grid',
@@ -161,12 +161,12 @@ export function generateCheckInListPDF(
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.text(
-      `Erstellt am ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`,
+      `Generated on ${new Date().toLocaleDateString('en-US')} at ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`,
       14,
       doc.internal.pageSize.getHeight() - 10
     );
     doc.text(
-      `Seite ${i} von ${pageCount}`,
+      `Page ${i} of ${pageCount}`,
       pageWidth - 14,
       doc.internal.pageSize.getHeight() - 10,
       { align: 'right' }

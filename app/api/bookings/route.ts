@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Ungültige Daten', details: validationResult.error.flatten() },
+        { error: 'Invalid data', details: validationResult.error.flatten() },
         { status: 400 }
       );
     }
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (!card.length) {
       return NextResponse.json(
-        { error: 'Ungültige Kartennummer' },
+        { error: 'Invalid card number' },
         { status: 400 }
       );
     }
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
     // Check if card is active
     if (cardData.status !== 'active') {
       const statusMessage = cardData.status === 'locked'
-        ? 'Diese Karte ist gesperrt'
-        : 'Diese Karte ist suspendiert';
+        ? 'This card is locked'
+        : 'This card is suspended';
       return NextResponse.json(
         { error: statusMessage },
         { status: 400 }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     // Check if card is suspended
     if (cardData.suspendedUntil && new Date(cardData.suspendedUntil) > new Date()) {
       return NextResponse.json(
-        { error: 'Diese Karte ist vorübergehend suspendiert' },
+        { error: 'This card is temporarily suspended' },
         { status: 400 }
       );
     }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (!session.length) {
       return NextResponse.json(
-        { error: 'Session nicht gefunden oder nicht verfügbar' },
+        { error: 'Session not found or not available' },
         { status: 404 }
       );
     }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     if (sessionDate < today) {
       return NextResponse.json(
-        { error: 'Diese Session ist bereits vorbei' },
+        { error: 'This session has already passed' },
         { status: 400 }
       );
     }
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     if (existingBooking.length) {
       return NextResponse.json(
-        { error: 'Du hast bereits eine Buchung für diese Session' },
+        { error: 'You already have a booking for this session' },
         { status: 400 }
       );
     }
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       position = currentWaitlist + 1;
     } else {
       return NextResponse.json(
-        { error: 'Diese Session ist leider voll' },
+        { error: 'This session is unfortunately full' },
         { status: 400 }
       );
     }
@@ -188,13 +188,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       booking: newBooking[0],
       message: bookingStatus === 'confirmed'
-        ? 'Buchung erfolgreich bestätigt!'
-        : `Du bist auf der Warteliste (Position ${position})`,
+        ? 'Booking successfully confirmed!'
+        : `You are on the waitlist (position ${position})`,
     });
   } catch (error) {
     console.error('Failed to create booking:', error);
     return NextResponse.json(
-      { error: 'Buchung konnte nicht erstellt werden' },
+      { error: 'Booking could not be created' },
       { status: 500 }
     );
   }
@@ -208,7 +208,7 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json(
-        { error: 'E-Mail-Adresse erforderlich' },
+        { error: 'Email address required' },
         { status: 400 }
       );
     }
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Ungültige E-Mail-Adresse' },
+        { error: 'Invalid email address' },
         { status: 400 }
       );
     }
@@ -254,7 +254,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Failed to fetch bookings:', error);
     return NextResponse.json(
-      { error: 'Buchungen konnten nicht abgerufen werden' },
+      { error: 'Bookings could not be retrieved' },
       { status: 500 }
     );
   }

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Ungültige Daten', details: validationResult.error.flatten() },
+        { error: 'Invalid data', details: validationResult.error.flatten() },
         { status: 400 }
       );
     }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (!card.length) {
       return NextResponse.json(
-        { error: 'Ungültiger Kartencode' },
+        { error: 'Invalid card code' },
         { status: 400 }
       );
     }
@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
     // Check if card is active
     if (cardData.status !== 'active') {
       const statusMessage = cardData.status === 'locked'
-        ? 'Diese Karte ist gesperrt'
-        : 'Diese Karte ist suspendiert';
+        ? 'This card is locked'
+        : 'This card is suspended';
       return NextResponse.json(
         { error: statusMessage },
         { status: 400 }
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Check if card is suspended
     if (cardData.suspendedUntil && new Date(cardData.suspendedUntil) > new Date()) {
       return NextResponse.json(
-        { error: 'Diese Karte ist vorübergehend suspendiert' },
+        { error: 'This card is temporarily suspended' },
         { status: 400 }
       );
     }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     if (!session.length) {
       return NextResponse.json(
-        { error: 'Session nicht gefunden oder nicht verfügbar' },
+        { error: 'Session not found or not available' },
         { status: 404 }
       );
     }
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     if (sessionDate < today) {
       return NextResponse.json(
-        { error: 'Diese Session ist bereits vorbei' },
+        { error: 'This session has already passed' },
         { status: 400 }
       );
     }
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     if (existingCardBooking.length) {
       return NextResponse.json(
-        { error: 'Diese Karte hat bereits eine Buchung für diese Session' },
+        { error: 'This card already has a booking for this session' },
         { status: 400 }
       );
     }
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
     if (existingEmailBooking.length) {
       return NextResponse.json(
-        { error: 'Diese E-Mail-Adresse hat bereits eine Buchung für diese Session' },
+        { error: 'This email address already has a booking for this session' },
         { status: 400 }
       );
     }
@@ -186,13 +186,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       verificationId: verificationRecord[0].id,
-      message: 'Bestätigungscode wurde an deine E-Mail gesendet',
+      message: 'Verification code has been sent to your email',
       expiresAt: expiresAt.toISOString(),
     });
   } catch (error) {
     console.error('Failed to request verification:', error);
     return NextResponse.json(
-      { error: 'Verifizierung konnte nicht gestartet werden' },
+      { error: 'Verification could not be started' },
       { status: 500 }
     );
   }

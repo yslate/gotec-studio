@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Ungültige Daten', details: validationResult.error.flatten() },
+        { error: 'Invalid data', details: validationResult.error.flatten() },
         { status: 400 }
       );
     }

@@ -27,7 +27,7 @@ export function SessionCard({ session }: SessionCardProps) {
   const isFull = available <= 0 && waitlistAvailable <= 0;
 
   const date = new Date(session.date);
-  const formattedDate = date.toLocaleDateString('de-DE', {
+  const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -43,36 +43,36 @@ export function SessionCard({ session }: SessionCardProps) {
             <CardDescription className="mt-1">{session.artistName}</CardDescription>
           </div>
           {isFull ? (
-            <Badge variant="secondary">Ausgebucht</Badge>
+            <Badge variant="secondary">Sold Out</Badge>
           ) : available <= 0 ? (
-            <Badge variant="outline">Nur Warteliste</Badge>
+            <Badge variant="outline">Waitlist Only</Badge>
           ) : available <= 3 ? (
-            <Badge variant="destructive">Nur noch {available} Plätze</Badge>
+            <Badge variant="destructive">Only {available} spots left</Badge>
           ) : null}
         </div>
       </CardHeader>
       <CardContent className="flex-1">
-        <div className="space-y-2 text-xs text-muted-foreground">
+        <div className="space-y-2 text-sm text-foreground/70">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground">Datum:</span>
+            <span className="font-medium text-foreground">Date:</span>
             <span>{formattedDate}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground">Uhrzeit:</span>
+            <span className="font-medium text-foreground">Time:</span>
             <span>{session.startTime} - {session.endTime}</span>
           </div>
           {session.description && (
-            <p className="pt-2 line-clamp-2">{session.description}</p>
+            <p className="pt-2 line-clamp-2 text-justify">{session.description}</p>
           )}
         </div>
-        <div className="mt-4 flex items-center gap-4 text-xs">
+        <div className="mt-4 flex items-center gap-4 text-sm">
           <div>
-            <span className="text-muted-foreground">Verfügbar: </span>
+            <span className="text-foreground/60">Available: </span>
             <span className="font-medium">{Math.max(0, available)}/{session.maxCardholders}</span>
           </div>
           {available <= 0 && (
             <div>
-              <span className="text-muted-foreground">Warteliste: </span>
+              <span className="text-foreground/60">Waitlist: </span>
               <span className="font-medium">{session.waitlistCount}/{session.maxWaitlist}</span>
             </div>
           )}
@@ -81,7 +81,7 @@ export function SessionCard({ session }: SessionCardProps) {
       <CardFooter>
         <Button asChild className="w-full" disabled={isFull}>
           <Link href={`/book/${session.id}`}>
-            {isFull ? 'Ausgebucht' : available <= 0 ? 'Auf Warteliste setzen' : 'Jetzt buchen'}
+            {isFull ? 'Sold Out' : available <= 0 ? 'Join Waitlist' : 'Book Now'}
           </Link>
         </Button>
       </CardFooter>

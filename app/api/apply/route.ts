@@ -1,23 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, recordingApplications } from '@/db';
+import { db, recordingApplications, recordingSlots } from '@/db';
+import { eq } from 'drizzle-orm';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, artistName, genre, artistOrigin, instagramUrl, soundcloudUrl, message } = body;
+    const { email, artistName, genre, artistOrigin, instagramUrl, soundcloudUrl, message, slotId } = body;
 
-    if (!email || !artistName || !genre || !artistOrigin || !message) {
+    if (!email || !artistName || !genre || !artistOrigin || !message || !slotId) {
       return NextResponse.json(
-        { error: 'Alle Pflichtfelder müssen ausgefüllt werden' },
+        { error: 'All required fields must be filled out' },
         { status: 400 }
       );
     }
 
     if (typeof email !== 'string' || !email.includes('@')) {
       return NextResponse.json(
-        { error: 'Ungültige E-Mail-Adresse' },
+        { error: 'Invalid email address' },
         { status: 400 }
       );
+    }
+
+    // Validate slotId if provided
+    if (slotId) {
+      const [slot] = await db
+        .select()
+        .from(recordingSlots)
+        .where(eq(recordingSlots.id, slotId));
+
+      if (!slot) {
+        return NextResponse.json(
+          { error: 'Selected slot does not exist' },
+          { status: 400 }
+        );
+      }
+
+      if (slot.status !== 'available') {
+        return NextResponse.json(
+          { error: 'Selected slot is no longer available' },
+          { status: 400 }
+        );
+      }
     }
 
     const [application] = await db
@@ -30,6 +53,7 @@ export async function POST(request: NextRequest) {
         instagramUrl: instagramUrl ? String(instagramUrl).slice(0, 500) : null,
         soundcloudUrl: soundcloudUrl ? String(soundcloudUrl).slice(0, 500) : null,
         message: String(message),
+        slotId: slotId || null,
       })
       .returning();
 
@@ -37,7 +61,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Failed to save recording application:', error);
     return NextResponse.json(
-      { error: 'Fehler beim Speichern der Bewerbung' },
+      { error: 'Failed to save application' },
       { status: 500 }
     );
   }

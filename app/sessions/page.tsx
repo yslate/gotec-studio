@@ -3,6 +3,7 @@ import { SessionCard } from '@/components/booking/session-card';
 import { Button } from '@/components/ui/button';
 import { SiteHeader } from '@/components/site-header';
 import { Footer } from '@/components/footer';
+import { getSettings } from '@/lib/settings';
 
 async function getSessions() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -18,7 +19,15 @@ async function getSessions() {
 }
 
 export default async function SessionsPage() {
-  const sessions = await getSessions();
+  const [sessions, s] = await Promise.all([
+    getSessions(),
+    getSettings([
+      'sessions.title',
+      'sessions.subtitle',
+      'sessions.empty',
+      'sessions.emptyHint',
+    ]),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -27,23 +36,23 @@ export default async function SessionsPage() {
       <main className="container mx-auto px-4 py-8 sm:py-12 flex-1 max-w-4xl">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-sm sm:text-base font-medium mb-1">Verfügbare Sessions</h1>
-            <p className="text-xs text-muted-foreground">
-              Wähle eine Recording Session und buche deinen Platz mit deiner Black Card
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-1">{s['sessions.title']}</h1>
+            <p className="text-sm text-foreground/70">
+              {s['sessions.subtitle']}
             </p>
           </div>
           <Button asChild variant="outline" size="sm" className="text-xs shrink-0">
-            <Link href="/my-bookings">Meine Buchungen</Link>
+            <Link href="/my-bookings">My Bookings</Link>
           </Button>
         </div>
 
         {sessions.length === 0 ? (
           <div className="text-center py-16 border border-dashed">
-            <p className="text-muted-foreground text-sm">
-              Aktuell keine Sessions verfügbar
+            <p className="text-foreground/70 text-base">
+              {s['sessions.empty']}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Schau später wieder vorbei!
+            <p className="text-sm text-foreground/50 mt-1">
+              {s['sessions.emptyHint']}
             </p>
           </div>
         ) : (

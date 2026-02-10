@@ -137,13 +137,13 @@ export default function AdminBookingsPage() {
   function getStatusBadge(status: string) {
     switch (status) {
       case 'confirmed':
-        return <Badge>Bestätigt</Badge>;
+        return <Badge>Confirmed</Badge>;
       case 'waitlist':
-        return <Badge variant="secondary">Warteliste</Badge>;
+        return <Badge variant="secondary">Waitlist</Badge>;
       case 'checked_in':
-        return <Badge variant="outline">Eingecheckt</Badge>;
+        return <Badge variant="outline">Checked In</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">Storniert</Badge>;
+        return <Badge variant="destructive">Cancelled</Badge>;
       case 'no_show':
         return <Badge variant="destructive">No-Show</Badge>;
       default:
@@ -154,8 +154,8 @@ export default function AdminBookingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">Buchungen</h1>
-        <p className="text-xs text-muted-foreground">Alle Buchungen verwalten</p>
+        <h1 className="text-lg font-semibold">Bookings</h1>
+        <p className="text-xs text-muted-foreground">Manage all bookings</p>
       </div>
 
       <div className="space-y-3">
@@ -165,15 +165,15 @@ export default function AdminBookingsPage() {
             onChange={(e) => setSelectedSession(e.target.value)}
             className="h-8 px-2 text-xs border bg-background sm:w-64"
           >
-            <option value="">Alle kommenden Sessions</option>
+            <option value="">All upcoming sessions</option>
             {sessions.map((session) => (
               <option key={session.id} value={session.id}>
-                {session.title} - {new Date(session.date).toLocaleDateString('de-DE')}
+                {session.title} - {new Date(session.date).toLocaleDateString('en-US')}
               </option>
             ))}
           </select>
           <Input
-            placeholder="Suche nach Name, Telefon, Karte..."
+            placeholder="Search by name, phone, card..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="sm:max-w-xs"
@@ -186,7 +186,7 @@ export default function AdminBookingsPage() {
               disabled={exportLoading || bookings.length === 0}
               className="text-xs"
             >
-              {exportLoading ? 'Generiere...' : 'PDF Export'}
+              {exportLoading ? 'Generating...' : 'PDF Export'}
             </Button>
           )}
         </div>
@@ -198,10 +198,10 @@ export default function AdminBookingsPage() {
               size="xs"
               onClick={() => setFilter(status)}
             >
-              {status === 'all' ? 'Alle' :
-               status === 'confirmed' ? 'Bestätigt' :
-               status === 'waitlist' ? 'Warteliste' :
-               status === 'checked_in' ? 'Eingecheckt' : 'Storniert'}
+              {status === 'all' ? 'All' :
+               status === 'confirmed' ? 'Confirmed' :
+               status === 'waitlist' ? 'Waitlist' :
+               status === 'checked_in' ? 'Checked In' : 'Cancelled'}
             </Button>
           ))}
         </div>
@@ -209,23 +209,23 @@ export default function AdminBookingsPage() {
 
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground text-sm">Lade Buchungen...</p>
+          <p className="text-muted-foreground text-sm">Loading bookings...</p>
         </div>
       ) : filteredBookings.length === 0 ? (
         <div className="text-center py-8 border border-dashed">
-          <p className="text-muted-foreground text-sm">Keine Buchungen gefunden</p>
+          <p className="text-muted-foreground text-sm">No bookings found</p>
         </div>
       ) : (
         <div className="border overflow-x-auto">
           <table className="w-full text-xs min-w-[600px]">
             <thead className="bg-muted/50">
               <tr>
-                <th className="text-left p-3 font-medium">Gast</th>
-                <th className="text-left p-3 font-medium">Karte</th>
+                <th className="text-left p-3 font-medium">Guest</th>
+                <th className="text-left p-3 font-medium">Card</th>
                 <th className="text-left p-3 font-medium">Session</th>
-                <th className="text-left p-3 font-medium">Datum</th>
+                <th className="text-left p-3 font-medium">Date</th>
                 <th className="text-left p-3 font-medium">Status</th>
-                <th className="text-left p-3 font-medium">Erstellt</th>
+                <th className="text-left p-3 font-medium">Created</th>
               </tr>
             </thead>
             <tbody>
@@ -248,7 +248,7 @@ export default function AdminBookingsPage() {
                   </td>
                   <td className="p-3">
                     <div>
-                      <p>{new Date(booking.session.date).toLocaleDateString('de-DE')}</p>
+                      <p>{new Date(booking.session.date).toLocaleDateString('en-US')}</p>
                       <p className="text-muted-foreground">{booking.session.startTime}</p>
                     </div>
                   </td>
@@ -259,7 +259,7 @@ export default function AdminBookingsPage() {
                     )}
                   </td>
                   <td className="p-3 text-muted-foreground">
-                    {new Date(booking.createdAt).toLocaleDateString('de-DE')}
+                    {new Date(booking.createdAt).toLocaleDateString('en-US')}
                   </td>
                 </tr>
               ))}

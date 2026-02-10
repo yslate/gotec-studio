@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     if (sessionsData.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'Keine Sessions morgen',
+        message: 'No sessions tomorrow',
         stats: { sessions: 0, cardholderReminders: 0, glReminders: 0 },
       });
     }
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
         try {
           await sendSessionReminder({
             to: ticket.guestEmail,
-            guestName: ticket.guestName || 'Gast',
+            guestName: ticket.guestName || 'Guest',
             sessionTitle: session.title,
             artistName: session.artistName,
             date: session.date,
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Erinnerungen gesendet`,
+      message: `Reminders sent`,
       stats: {
         sessions: sessionsData.length,
         cardholderReminders,
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Failed to send reminders:', error);
     return NextResponse.json(
-      { error: 'Fehler beim Senden der Erinnerungen' },
+      { error: 'Failed to send reminders' },
       { status: 500 }
     );
   }

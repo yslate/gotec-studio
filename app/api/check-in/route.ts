@@ -11,12 +11,19 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Ungültige Daten', details: validationResult.error.flatten() },
+        { error: 'Invalid data', details: validationResult.error.flatten() },
         { status: 400 }
       );
     }
 
-    const { code, sessionId } = validationResult.data;
+    let { code } = validationResult.data;
+    const { sessionId } = validationResult.data;
+
+    // Extract ticket code from URL if QR code contains a full URL (e.g. https://example.com/gl/GL-XXXXXXXX)
+    const glUrlMatch = code.match(/\/gl\/(GL-[A-Z0-9]+)$/i);
+    if (glUrlMatch) {
+      code = glUrlMatch[1].toUpperCase();
+    }
 
     // Verify session exists and is today
     const session = await db
@@ -27,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (!session.length) {
       return NextResponse.json(
-        { error: 'Session nicht gefunden' },
+        { error: 'Session not found' },
         { status: 404 }
       );
     }
@@ -37,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     if (sessionData.date !== today) {
       return NextResponse.json(
-        { error: 'Diese Session findet nicht heute statt' },
+        { error: 'This session is not scheduled for today' },
         { status: 400 }
       );
     }
@@ -55,7 +62,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Check-in failed:', error);
     return NextResponse.json(
-      { error: 'Check-in fehlgeschlagen' },
+      { error: 'Check-in failed' },
       { status: 500 }
     );
   }
@@ -71,7 +78,7 @@ async function handleCardholderCheckIn(cardNumber: number, sessionId: string) {
 
   if (!card.length) {
     return NextResponse.json(
-      { error: 'Ungültige Kartennummer' },
+      { error: 'Invalid card number' },
       { status: 400 }
     );
   }
@@ -96,7 +103,7 @@ async function handleCardholderCheckIn(cardNumber: number, sessionId: string) {
 
   if (!booking.length) {
     return NextResponse.json(
-      { error: 'Keine Buchung für diese Karte gefunden' },
+      { error: 'No booking found for this card' },
       { status: 404 }
     );
   }
@@ -106,7 +113,7 @@ async function handleCardholderCheckIn(cardNumber: number, sessionId: string) {
   // Check if already checked in
   if (bookingData.status === 'checked_in') {
     return NextResponse.json(
-      { error: 'Bereits eingecheckt' },
+      { error: 'Already checked in' },
       { status: 400 }
     );
   }
@@ -114,7 +121,7 @@ async function handleCardholderCheckIn(cardNumber: number, sessionId: string) {
   // Check if on waitlist
   if (bookingData.status === 'waitlist') {
     return NextResponse.json(
-      { error: 'Du bist auf der Warteliste. Bitte warte auf Bestätigung.' },
+      { error: 'You are on the waitlist. Please wait for confirmation.' },
       { status: 400 }
     );
   }
@@ -141,7 +148,7 @@ async function handleCardholderCheckIn(cardNumber: number, sessionId: string) {
     type: 'cardholder',
     guestName: bookingData.guestName,
     cardNumber,
-    message: `Willkommen, ${bookingData.guestName}!`,
+    message: `Welcome, ${bookingData.guestName}!`,
   });
 }
 
@@ -160,7 +167,7 @@ async function handleGuestListCheckIn(code: string, sessionId: string) {
 
   if (!ticket.length) {
     return NextResponse.json(
-      { error: 'Ungültiger QR-Code' },
+      { error: 'Invalid QR code' },
       { status: 404 }
     );
   }
@@ -170,14 +177,14 @@ async function handleGuestListCheckIn(code: string, sessionId: string) {
   // Check ticket status
   if (ticketData.status === 'used') {
     return NextResponse.json(
-      { error: 'Dieses Ticket wurde bereits verwendet' },
+      { error: 'This ticket has already been used' },
       { status: 400 }
     );
   }
 
   if (ticketData.status === 'expired') {
     return NextResponse.json(
-      { error: 'Dieses Ticket ist abgelaufen' },
+      { error: 'This ticket has expired' },
       { status: 400 }
     );
   }
@@ -203,6 +210,6 @@ async function handleGuestListCheckIn(code: string, sessionId: string) {
     type: 'guest_list',
     guestName: ticketData.guestName,
     allocatedBy: ticketData.allocatedBy,
-    message: `Willkommen, ${ticketData.guestName}!`,
+    message: `Welcome, ${ticketData.guestName}!`,
   });
 }

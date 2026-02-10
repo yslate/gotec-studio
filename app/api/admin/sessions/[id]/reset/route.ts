@@ -26,7 +26,7 @@ export async function POST(
       .limit(1);
 
     if (!sessionData.length) {
-      return NextResponse.json({ error: 'Session nicht gefunden' }, { status: 404 });
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
     // Get bookings that will be marked as no-shows (with card IDs)
@@ -75,7 +75,7 @@ export async function POST(
           .update(blackCards)
           .set({
             status: 'locked',
-            notes: `Automatisch gesperrt: ${updatedCard[0].noShowCount} No-Shows`,
+            notes: `Automatically locked: ${updatedCard[0].noShowCount} no-shows`,
             updatedAt: new Date(),
           })
           .where(eq(blackCards.id, cardId));
@@ -100,8 +100,8 @@ export async function POST(
     return NextResponse.json({
       success: true,
       message: lockedCards.length > 0
-        ? `Session zurückgesetzt. ${lockedCards.length} Karte(n) wegen zu vieler No-Shows gesperrt.`
-        : 'Session wurde zurückgesetzt',
+        ? `Session reset. ${lockedCards.length} card(s) locked due to too many no-shows.`
+        : 'Session has been reset',
       stats: {
         noShows: noShowBookings.length,
         expiredTickets: expiredGlResult.length,
@@ -111,7 +111,7 @@ export async function POST(
   } catch (error) {
     console.error('Failed to reset session:', error);
     return NextResponse.json(
-      { error: 'Fehler beim Zurücksetzen der Session' },
+      { error: 'Failed to reset session' },
       { status: 500 }
     );
   }

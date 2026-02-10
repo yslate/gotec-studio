@@ -63,7 +63,7 @@ export default function AdminCardsPage() {
   });
 
   async function handleLock(cardId: number) {
-    if (!confirm('Möchtest du diese Karte wirklich sperren?')) {
+    if (!confirm('Do you really want to lock this card?')) {
       return;
     }
 
@@ -71,13 +71,13 @@ export default function AdminCardsPage() {
     const res = await fetch(`/api/admin/cards/${cardId}/lock`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason: 'Manuell gesperrt' }),
+      body: JSON.stringify({ reason: 'Manually locked' }),
     });
 
     if (res.ok) {
       await fetchCards();
     } else {
-      alert('Fehler beim Sperren der Karte');
+      alert('Error locking card');
     }
     setActionLoading(null);
   }
@@ -91,7 +91,7 @@ export default function AdminCardsPage() {
     if (res.ok) {
       await fetchCards();
     } else {
-      alert('Fehler beim Entsperren der Karte');
+      alert('Error unlocking card');
     }
     setActionLoading(null);
   }
@@ -99,11 +99,11 @@ export default function AdminCardsPage() {
   function getStatusBadge(status: string) {
     switch (status) {
       case 'active':
-        return <Badge>Aktiv</Badge>;
+        return <Badge>Active</Badge>;
       case 'locked':
-        return <Badge variant="destructive">Gesperrt</Badge>;
+        return <Badge variant="destructive">Locked</Badge>;
       case 'suspended':
-        return <Badge variant="secondary">Suspendiert</Badge>;
+        return <Badge variant="secondary">Suspended</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -113,12 +113,12 @@ export default function AdminCardsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold">Black Cards</h1>
-        <p className="text-xs text-muted-foreground">Kartenstatus verwalten</p>
+        <p className="text-xs text-muted-foreground">Manage card status</p>
       </div>
 
       <div className="space-y-3">
         <Input
-          placeholder="Suche nach Code, Name, E-Mail..."
+          placeholder="Search by code, name, email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:max-w-xs"
@@ -131,9 +131,9 @@ export default function AdminCardsPage() {
               size="xs"
               onClick={() => setFilter(status)}
             >
-              {status === 'all' ? 'Alle' :
-               status === 'active' ? 'Aktiv' :
-               status === 'locked' ? 'Gesperrt' : 'Suspendiert'}
+              {status === 'all' ? 'All' :
+               status === 'active' ? 'Active' :
+               status === 'locked' ? 'Locked' : 'Suspended'}
             </Button>
           ))}
         </div>
@@ -141,7 +141,7 @@ export default function AdminCardsPage() {
 
       {loading ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground text-sm">Lade Karten...</p>
+          <p className="text-muted-foreground text-sm">Loading cards...</p>
         </div>
       ) : (
         <div className="border overflow-x-auto">
@@ -149,11 +149,11 @@ export default function AdminCardsPage() {
             <thead className="bg-muted/50">
               <tr>
                 <th className="text-left p-3 font-medium">Code</th>
-                <th className="text-left p-3 font-medium">Inhaber</th>
-                <th className="text-left p-3 font-medium">Buchungen</th>
+                <th className="text-left p-3 font-medium">Holder</th>
+                <th className="text-left p-3 font-medium">Bookings</th>
                 <th className="text-left p-3 font-medium">No-Shows</th>
                 <th className="text-left p-3 font-medium">Status</th>
-                <th className="text-right p-3 font-medium">Aktionen</th>
+                <th className="text-right p-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -177,8 +177,8 @@ export default function AdminCardsPage() {
                     )}
                   </td>
                   <td className="p-3">
-                    <span>{card.activeBookings} aktiv</span>
-                    <span className="text-muted-foreground"> / {card.totalBookings} gesamt</span>
+                    <span>{card.activeBookings} active</span>
+                    <span className="text-muted-foreground"> / {card.totalBookings} total</span>
                   </td>
                   <td className="p-3">
                     <span className={card.noShowCount >= 2 ? 'text-destructive font-medium' : ''}>
@@ -189,7 +189,7 @@ export default function AdminCardsPage() {
                     {getStatusBadge(card.status)}
                     {card.suspendedUntil && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        bis {new Date(card.suspendedUntil).toLocaleDateString('de-DE')}
+                        until {new Date(card.suspendedUntil).toLocaleDateString('en-US')}
                       </p>
                     )}
                   </td>
@@ -201,7 +201,7 @@ export default function AdminCardsPage() {
                         onClick={() => handleLock(card.id)}
                         disabled={actionLoading === card.id}
                       >
-                        {actionLoading === card.id ? '...' : 'Sperren'}
+                        {actionLoading === card.id ? '...' : 'Lock'}
                       </Button>
                     ) : (
                       <Button
@@ -210,7 +210,7 @@ export default function AdminCardsPage() {
                         onClick={() => handleUnlock(card.id)}
                         disabled={actionLoading === card.id}
                       >
-                        {actionLoading === card.id ? '...' : 'Entsperren'}
+                        {actionLoading === card.id ? '...' : 'Unlock'}
                       </Button>
                     )}
                   </td>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useSettings } from '@/lib/use-settings';
 
 interface Booking {
   id: string;
@@ -29,6 +30,7 @@ interface Booking {
 }
 
 export default function MyBookingsPage() {
+  const s = useSettings(['mybookings.title', 'mybookings.subtitle', 'mybookings.empty', 'mybookings.emptyHint']);
   const [email, setEmail] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,13 +49,13 @@ export default function MyBookingsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Fehler beim Abrufen der Buchungen');
+        setError(data.error || 'Error fetching bookings');
         setBookings([]);
       } else {
         setBookings(data);
       }
     } catch {
-      setError('Ein Fehler ist aufgetreten');
+      setError('An error occurred');
       setBookings([]);
     } finally {
       setLoading(false);
@@ -61,7 +63,7 @@ export default function MyBookingsPage() {
   }
 
   async function handleCancel(bookingId: string) {
-    if (!confirm('Möchtest du diese Buchung wirklich stornieren?')) {
+    if (!confirm('Do you really want to cancel this booking?')) {
       return;
     }
 
@@ -74,7 +76,7 @@ export default function MyBookingsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || 'Stornierung fehlgeschlagen');
+        alert(data.error || 'Cancellation failed');
       } else {
         // Refresh bookings
         setBookings(bookings.map(b =>
@@ -82,7 +84,7 @@ export default function MyBookingsPage() {
         ));
       }
     } catch {
-      alert('Ein Fehler ist aufgetreten');
+      alert('An error occurred');
     } finally {
       setCancellingId(null);
     }
@@ -91,15 +93,15 @@ export default function MyBookingsPage() {
   function getStatusBadge(status: string, position: number | null) {
     switch (status) {
       case 'confirmed':
-        return <Badge>Bestätigt</Badge>;
+        return <Badge>Confirmed</Badge>;
       case 'waitlist':
-        return <Badge variant="secondary">Warteliste #{position}</Badge>;
+        return <Badge variant="secondary">Waitlist #{position}</Badge>;
       case 'checked_in':
-        return <Badge variant="outline">Eingecheckt</Badge>;
+        return <Badge variant="outline">Checked In</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">Storniert</Badge>;
+        return <Badge variant="destructive">Cancelled</Badge>;
       case 'no_show':
-        return <Badge variant="destructive">Nicht erschienen</Badge>;
+        return <Badge variant="destructive">No-Show</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -120,7 +122,7 @@ export default function MyBookingsPage() {
               />
             </Link>
             <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
-              <Link href="/">Zurück</Link>
+              <Link href="/">Back</Link>
             </Button>
           </div>
         </div>
@@ -129,9 +131,9 @@ export default function MyBookingsPage() {
       <main className="container mx-auto px-4 py-6 sm:py-8 max-w-2xl">
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Buchungen abrufen</CardTitle>
-            <CardDescription>
-              Gib deine E-Mail-Adresse ein, um deine Buchungen zu sehen
+            <CardTitle className="text-xl">{s['mybookings.title']}</CardTitle>
+            <CardDescription className="text-sm text-foreground/70">
+              {s['mybookings.subtitle']}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -140,12 +142,12 @@ export default function MyBookingsPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="deine@email.de"
+                placeholder="your@email.com"
                 required
                 className="w-full sm:flex-1"
               />
               <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-                {loading ? 'Suche...' : 'Suchen'}
+                {loading ? 'Searching...' : 'Search'}
               </Button>
             </form>
           </CardContent>
@@ -159,14 +161,14 @@ export default function MyBookingsPage() {
 
         {searched && bookings.length === 0 && !error && (
           <div className="text-center py-8 border border-dashed">
-            <p className="text-muted-foreground text-sm">
-              Keine Buchungen gefunden
+            <p className="text-foreground/70 text-base">
+              {s['mybookings.empty']}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Prüfe deine E-Mail-Adresse oder buche eine Session
+            <p className="text-sm text-foreground/50 mt-1">
+              {s['mybookings.emptyHint']}
             </p>
             <Button asChild className="mt-4" size="sm">
-              <Link href="/">Sessions ansehen</Link>
+              <Link href="/">View Sessions</Link>
             </Button>
           </div>
         )}
@@ -190,11 +192,11 @@ export default function MyBookingsPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Datum: </span>
+                        <span className="text-foreground/60">Date: </span>
                         <span className="font-medium">
-                          {sessionDate.toLocaleDateString('de-DE', {
+                          {sessionDate.toLocaleDateString('en-US', {
                             weekday: 'short',
                             day: '2-digit',
                             month: '2-digit',
@@ -203,17 +205,17 @@ export default function MyBookingsPage() {
                         </span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Uhrzeit: </span>
+                        <span className="text-foreground/60">Time: </span>
                         <span className="font-medium">
                           {booking.session.startTime} - {booking.session.endTime}
                         </span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Name: </span>
+                        <span className="text-foreground/60">Name: </span>
                         <span className="font-medium">{booking.guestName}</span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Karte: </span>
+                        <span className="text-foreground/60">Card: </span>
                         <span className="font-medium">#{booking.card.cardNumber}</span>
                       </div>
                     </div>
@@ -226,7 +228,7 @@ export default function MyBookingsPage() {
                         onClick={() => handleCancel(booking.id)}
                         disabled={cancellingId === booking.id}
                       >
-                        {cancellingId === booking.id ? 'Storniere...' : 'Stornieren'}
+                        {cancellingId === booking.id ? 'Cancelling...' : 'Cancel'}
                       </Button>
                     </CardFooter>
                   )}

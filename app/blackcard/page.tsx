@@ -1,36 +1,34 @@
 import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 import { Footer } from '@/components/footer';
+import { getSettings } from '@/lib/settings';
 
-export default function BlackCardPage() {
+export default async function BlackCardPage() {
+  const s = await getSettings([
+    'blackcard.title',
+    'blackcard.text1',
+    'blackcard.text2',
+    'blackcard.text3',
+    'blackcard.text4',
+    'blackcard.text5',
+  ]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
 
       <main className="container mx-auto px-4 py-12 sm:py-20 max-w-2xl flex-1">
-        <h1 className="text-xs uppercase tracking-widest text-primary mb-8">
-          The Black Card
+        <h1 className="text-3xl font-bold text-primary mb-8">
+          {s['blackcard.title']}
         </h1>
 
-        <div className="space-y-6 text-sm text-muted-foreground leading-relaxed">
-          <p>
-            You don&apos;t ask for it. You earn it &mdash; by fully vibing with the music
-            at Gotec Club.
-          </p>
-          <p>
-            When your energy stands out, someone will notice &mdash; and hand you the
-            Black Card.
-          </p>
-          <p>
-            It gives you one-time access to a live session at Gotec Records &mdash; a raw
-            DJ recording, straight from the source.
-          </p>
-          <p>
-            After that, the card goes back to the club &mdash; waiting for the next one
-            who feels the music deep.
-          </p>
+        <div className="space-y-6 text-base text-foreground/80 leading-relaxed text-justify">
+          <p>{s['blackcard.text1']}</p>
+          <p>{s['blackcard.text2']}</p>
+          <p>{s['blackcard.text3']}</p>
+          <p>{s['blackcard.text4']}</p>
           <p className="text-primary font-medium pt-4">
-            Use it wisely.
+            {s['blackcard.text5']}
           </p>
         </div>
 

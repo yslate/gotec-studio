@@ -15,7 +15,7 @@ export async function DELETE(
 
     if (!email) {
       return NextResponse.json(
-        { error: 'E-Mail-Adresse erforderlich' },
+        { error: 'Email address required' },
         { status: 400 }
       );
     }
@@ -47,7 +47,7 @@ export async function DELETE(
 
     if (!booking.length) {
       return NextResponse.json(
-        { error: 'Buchung nicht gefunden' },
+        { error: 'Booking not found' },
         { status: 404 }
       );
     }
@@ -58,7 +58,7 @@ export async function DELETE(
     const normalizedEmail = email.toLowerCase();
     if (bookingData.guestEmail?.toLowerCase() !== normalizedEmail) {
       return NextResponse.json(
-        { error: 'Ungültige E-Mail-Adresse' },
+        { error: 'Invalid email address' },
         { status: 403 }
       );
     }
@@ -66,7 +66,7 @@ export async function DELETE(
     // Check if already cancelled
     if (bookingData.status === 'cancelled') {
       return NextResponse.json(
-        { error: 'Buchung ist bereits storniert' },
+        { error: 'Booking is already cancelled' },
         { status: 400 }
       );
     }
@@ -78,7 +78,7 @@ export async function DELETE(
 
     if (sessionDate < today) {
       return NextResponse.json(
-        { error: 'Vergangene Buchungen können nicht storniert werden' },
+        { error: 'Past bookings cannot be cancelled' },
         { status: 400 }
       );
     }
@@ -181,12 +181,12 @@ export async function DELETE(
     }
 
     return NextResponse.json({
-      message: 'Buchung erfolgreich storniert',
+      message: 'Booking successfully cancelled',
     });
   } catch (error) {
     console.error('Failed to cancel booking:', error);
     return NextResponse.json(
-      { error: 'Buchung konnte nicht storniert werden' },
+      { error: 'Booking could not be cancelled' },
       { status: 500 }
     );
   }

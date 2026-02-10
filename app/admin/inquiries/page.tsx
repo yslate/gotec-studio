@@ -15,9 +15,9 @@ interface Inquiry {
 }
 
 const statusLabels: Record<string, string> = {
-  new: 'Neu',
-  read: 'Gelesen',
-  archived: 'Archiviert',
+  new: 'New',
+  read: 'Read',
+  archived: 'Archived',
 };
 
 const statusVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
@@ -65,7 +65,7 @@ export default function AdminInquiriesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-medium">Anfragen</h1>
+        <h1 className="text-lg font-medium">Inquiries</h1>
         <div className="flex gap-1">
           {['all', 'new', 'read', 'archived'].map((f) => (
             <Button
@@ -75,17 +75,17 @@ export default function AdminInquiriesPage() {
               className="text-xs"
               onClick={() => setFilter(f)}
             >
-              {f === 'all' ? 'Alle' : statusLabels[f]}
+              {f === 'all' ? 'All' : statusLabels[f]}
             </Button>
           ))}
         </div>
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Laden...</p>
+        <p className="text-sm text-muted-foreground">Loading...</p>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 border border-dashed">
-          <p className="text-sm text-muted-foreground">Keine Anfragen</p>
+          <p className="text-sm text-muted-foreground">No inquiries</p>
         </div>
       ) : (
         <div className="flex gap-4">
@@ -114,7 +114,7 @@ export default function AdminInquiriesPage() {
                 </div>
                 <p className="text-xs text-muted-foreground truncate">{inquiry.subject}</p>
                 <p className="text-[10px] text-muted-foreground mt-1">
-                  {new Date(inquiry.createdAt).toLocaleDateString('de-DE', {
+                  {new Date(inquiry.createdAt).toLocaleDateString('en-US', {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric',
@@ -143,7 +143,7 @@ export default function AdminInquiriesPage() {
 
               <div className="space-y-2 text-xs">
                 <div>
-                  <span className="text-muted-foreground">Von: </span>
+                  <span className="text-muted-foreground">From: </span>
                   <span>{selected.name}</span>
                 </div>
                 <div>
@@ -153,9 +153,9 @@ export default function AdminInquiriesPage() {
                   </a>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Datum: </span>
+                  <span className="text-muted-foreground">Date: </span>
                   <span>
-                    {new Date(selected.createdAt).toLocaleDateString('de-DE', {
+                    {new Date(selected.createdAt).toLocaleDateString('en-US', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -178,7 +178,7 @@ export default function AdminInquiriesPage() {
                     className="text-xs"
                     onClick={() => updateStatus(selected.id, 'read')}
                   >
-                    Als gelesen markieren
+                    Mark as read
                   </Button>
                 )}
                 {selected.status !== 'archived' && (
@@ -188,7 +188,7 @@ export default function AdminInquiriesPage() {
                     className="text-xs"
                     onClick={() => updateStatus(selected.id, 'archived')}
                   >
-                    Archivieren
+                    Archive
                   </Button>
                 )}
                 {selected.status === 'archived' && (
@@ -198,7 +198,7 @@ export default function AdminInquiriesPage() {
                     className="text-xs"
                     onClick={() => updateStatus(selected.id, 'new')}
                   >
-                    Wiederherstellen
+                    Restore
                   </Button>
                 )}
               </div>

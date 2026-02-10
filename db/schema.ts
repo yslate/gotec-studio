@@ -8,6 +8,7 @@ export const bookingStatusEnum = pgEnum('booking_status', ['confirmed', 'waitlis
 export const ticketStatusEnum = pgEnum('ticket_status', ['valid', 'used', 'expired']);
 export const inquiryStatusEnum = pgEnum('inquiry_status', ['new', 'read', 'archived']);
 export const applicationStatusEnum = pgEnum('application_status', ['new', 'reviewed', 'accepted', 'rejected']);
+export const slotStatusEnum = pgEnum('slot_status', ['available', 'booked']);
 
 // Users table - Admin and Staff accounts
 export const users = pgTable('users', {
@@ -118,6 +119,16 @@ export const contactInquiries = pgTable('contact_inquiries', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+// Recording Slots table
+export const recordingSlots = pgTable('recording_slots', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  date: date('date').notNull(),
+  startTime: time('start_time').notNull(),
+  endTime: time('end_time').notNull(),
+  status: slotStatusEnum('status').notNull().default('available'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Recording Applications table
 export const recordingApplications = pgTable('recording_applications', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -128,6 +139,7 @@ export const recordingApplications = pgTable('recording_applications', {
   instagramUrl: varchar('instagram_url', { length: 500 }),
   soundcloudUrl: varchar('soundcloud_url', { length: 500 }),
   message: text('message').notNull(),
+  slotId: uuid('slot_id').references(() => recordingSlots.id, { onDelete: 'set null' }),
   status: applicationStatusEnum('status').notNull().default('new'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
@@ -193,6 +205,25 @@ export const emailVerificationCodesRelations = relations(emailVerificationCodes,
   }),
 }));
 
+export const recordingSlotsRelations = relations(recordingSlots, ({ many }) => ({
+  applications: many(recordingApplications),
+}));
+
+export const recordingApplicationsRelations = relations(recordingApplications, ({ one }) => ({
+  slot: one(recordingSlots, {
+    fields: [recordingApplications.slotId],
+    references: [recordingSlots.id],
+  }),
+}));
+
+// Site Settings table - key-value store for admin-editable content
+export const siteSettings = pgTable('site_settings', {
+  key: varchar('key', { length: 255 }).primaryKey(),
+  value: text('value').notNull(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedBy: uuid('updated_by').references(() => users.id),
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -210,5 +241,9 @@ export type EmailVerificationCode = typeof emailVerificationCodes.$inferSelect;
 export type NewEmailVerificationCode = typeof emailVerificationCodes.$inferInsert;
 export type ContactInquiry = typeof contactInquiries.$inferSelect;
 export type NewContactInquiry = typeof contactInquiries.$inferInsert;
+export type RecordingSlot = typeof recordingSlots.$inferSelect;
+export type NewRecordingSlot = typeof recordingSlots.$inferInsert;
 export type RecordingApplication = typeof recordingApplications.$inferSelect;
 export type NewRecordingApplication = typeof recordingApplications.$inferInsert;
+export type SiteSetting = typeof siteSettings.$inferSelect;
+export type NewSiteSetting = typeof siteSettings.$inferInsert;

@@ -45,7 +45,7 @@ export default async function BookingPage({ params }: PageProps) {
               />
             </Link>
             <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
-              <Link href="/">Zurück</Link>
+              <Link href="/">Back</Link>
             </Button>
           </div>
         </div>
