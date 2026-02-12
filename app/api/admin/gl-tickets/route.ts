@@ -3,7 +3,7 @@ import { db, guestListTickets, recordingSessions } from '@/db';
 import { eq, sql, desc } from 'drizzle-orm';
 import { getAdminSession } from '@/lib/admin-auth';
 import { createGLTicketSchema, createBulkGLTicketsSchema } from '@/lib/validations';
-import { sendGLTicket } from '@/lib/email';
+import { sendGLTicket, fireAndForgetEmail } from '@/lib/email';
 import { generateTicketCode } from '@/lib/ticket-utils';
 import QRCode from 'qrcode';
 
@@ -130,20 +130,22 @@ export async function POST(request: NextRequest) {
       const sessionInfo = sessionData[0];
       for (const ticket of newTickets) {
         if (ticket.guestEmail) {
-          QRCode.toDataURL(`${APP_URL}/gl/${ticket.code}`, { width: 200, margin: 1 })
-            .then(qrDataUrl => sendGLTicket({
-              to: ticket.guestEmail,
-              guestName: ticket.guestName,
-              sessionTitle: sessionInfo.title,
-              artistName: sessionInfo.artistName,
-              date: sessionInfo.date,
-              startTime: sessionInfo.startTime,
-              endTime: sessionInfo.endTime,
-              ticketCode: ticket.code,
-              allocatedBy: ticket.allocatedBy || undefined,
-              qrDataUrl,
-            }))
-            .catch(err => console.error('[API] GL ticket email failed:', err));
+          fireAndForgetEmail(
+            QRCode.toDataURL(`${APP_URL}/gl/${ticket.code}`, { width: 200, margin: 1 })
+              .then(qrDataUrl => sendGLTicket({
+                to: ticket.guestEmail,
+                guestName: ticket.guestName,
+                sessionTitle: sessionInfo.title,
+                artistName: sessionInfo.artistName,
+                date: sessionInfo.date,
+                startTime: sessionInfo.startTime,
+                endTime: sessionInfo.endTime,
+                ticketCode: ticket.code,
+                allocatedBy: ticket.allocatedBy || undefined,
+                qrDataUrl,
+              })),
+            `GL ticket (bulk) to ${ticket.guestEmail}`
+          );
         }
       }
 
@@ -202,20 +204,22 @@ export async function POST(request: NextRequest) {
     // Send email with QR code (guestEmail is now required)
     if (guestEmail) {
       const sessionInfo = sessionData[0];
-      QRCode.toDataURL(`${APP_URL}/gl/${ticketCode}`, { width: 200, margin: 1 })
-        .then(qrDataUrl => sendGLTicket({
-          to: guestEmail,
-          guestName,
-          sessionTitle: sessionInfo.title,
-          artistName: sessionInfo.artistName,
-          date: sessionInfo.date,
-          startTime: sessionInfo.startTime,
-          endTime: sessionInfo.endTime,
-          ticketCode,
-          allocatedBy: allocatedBy || undefined,
-          qrDataUrl,
-        }))
-        .catch(err => console.error('[API] GL ticket email failed:', err));
+      fireAndForgetEmail(
+        QRCode.toDataURL(`${APP_URL}/gl/${ticketCode}`, { width: 200, margin: 1 })
+          .then(qrDataUrl => sendGLTicket({
+            to: guestEmail,
+            guestName,
+            sessionTitle: sessionInfo.title,
+            artistName: sessionInfo.artistName,
+            date: sessionInfo.date,
+            startTime: sessionInfo.startTime,
+            endTime: sessionInfo.endTime,
+            ticketCode,
+            allocatedBy: allocatedBy || undefined,
+            qrDataUrl,
+          })),
+        `GL ticket to ${guestEmail}`
+      );
     }
 
     return NextResponse.json(newTicket[0]);

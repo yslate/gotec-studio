@@ -1066,3 +1066,24 @@ export async function sendSlotTaken(data: SlotTakenData) {
 export function isEmailConfigured(): boolean {
   return !!client;
 }
+
+// ============================================
+// UTILITY: Fire-and-forget email with proper logging
+// ============================================
+
+/**
+ * Wraps an email send call for fire-and-forget use.
+ * Logs the result properly instead of silently swallowing errors.
+ */
+export function fireAndForgetEmail(
+  emailPromise: Promise<{ sent: boolean; reason?: string; error?: unknown }>,
+  context: string
+): void {
+  emailPromise.then((result) => {
+    if (!result.sent && result.reason !== 'not_configured') {
+      console.error(`[Email] ${context} — failed to send:`, result.error);
+    }
+  }).catch((err) => {
+    console.error(`[Email] ${context} — unexpected error:`, err);
+  });
+}

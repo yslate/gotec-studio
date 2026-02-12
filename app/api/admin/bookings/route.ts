@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, bookings, blackCards, recordingSessions } from '@/db';
-import { eq, desc, and, or, gte } from 'drizzle-orm';
+import { eq, desc, and, or, gte, ilike, sql } from 'drizzle-orm';
 import { getAdminSession } from '@/lib/admin-auth';
+import { getTodayString } from '@/lib/date-utils';
 
 // GET /api/admin/bookings - Get all bookings with filters
 export async function GET(request: NextRequest) {
@@ -15,6 +16,9 @@ export async function GET(request: NextRequest) {
     const sessionId = searchParams.get('sessionId');
     const status = searchParams.get('status');
     const upcoming = searchParams.get('upcoming') === 'true';
+    const search = searchParams.get('search');
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 100);
 
     let query = db
       .select({
@@ -54,21 +58,57 @@ export async function GET(request: NextRequest) {
     }
 
     if (upcoming) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayString();
       conditions.push(gte(recordingSessions.date, today));
+    }
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(bookings.guestName, `%${search}%`),
+          ilike(bookings.guestEmail, `%${search}%`),
+          ilike(recordingSessions.title, `%${search}%`),
+          ilike(recordingSessions.artistName, `%${search}%`)
+        )!
+      );
     }
 
     if (conditions.length > 0) {
       query = query.where(and(...conditions));
     }
 
+    const offset = (page - 1) * limit;
+
     const allBookings = await query.orderBy(
       desc(recordingSessions.date),
       bookings.status,
       bookings.position
-    );
+    ).limit(limit).offset(offset);
 
-    return NextResponse.json(allBookings);
+    // Get total count for pagination
+    let countQuery = db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(bookings)
+      .innerJoin(recordingSessions, eq(bookings.sessionId, recordingSessions.id))
+      .innerJoin(blackCards, eq(bookings.cardId, blackCards.id))
+      .$dynamic();
+
+    if (conditions.length > 0) {
+      countQuery = countQuery.where(and(...conditions));
+    }
+
+    const totalCount = await countQuery;
+    const total = totalCount[0]?.count || 0;
+
+    return NextResponse.json({
+      data: allBookings,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('Failed to fetch bookings:', error);
     return NextResponse.json(

@@ -4,9 +4,10 @@ import { sql, eq, and, gte, gt, or, desc } from 'drizzle-orm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getTodayString } from '@/lib/date-utils';
 
 async function getStats() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayString();
 
   // Total sessions
   const totalSessions = await db

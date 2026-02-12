@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, bookings, recordingSessions, blackCards, guestListTickets } from '@/db';
 import { eq, and, sql } from 'drizzle-orm';
 import { sendSessionReminder } from '@/lib/email';
+import { getTomorrowString } from '@/lib/date-utils';
 
 // Verify cron secret to prevent unauthorized calls
 function verifyCronSecret(request: NextRequest): boolean {
@@ -24,10 +25,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get tomorrow's date in YYYY-MM-DD format
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    // Get tomorrow's date in YYYY-MM-DD format (timezone-aware)
+    const tomorrowStr = getTomorrowString();
 
     // Find sessions happening tomorrow
     const sessionsData = await db

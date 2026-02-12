@@ -4,7 +4,7 @@ import { eq, sql } from 'drizzle-orm';
 import { getAdminSession } from '@/lib/admin-auth';
 import { sendDJGuestListSchema } from '@/lib/validations';
 import { generateTicketCode } from '@/lib/ticket-utils';
-import { sendDJGuestListEmail } from '@/lib/email';
+import { sendDJGuestListEmail, fireAndForgetEmail } from '@/lib/email';
 import QRCode from 'qrcode';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -88,15 +88,18 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    sendDJGuestListEmail({
-      to: djEmail,
-      artistName: sessionInfo.artistName,
-      sessionTitle: sessionInfo.title,
-      date: sessionInfo.date,
-      startTime: sessionInfo.startTime,
-      endTime: sessionInfo.endTime,
-      tickets: ticketsWithQR,
-    }).catch(err => console.error('[API] DJ guest list email failed:', err));
+    fireAndForgetEmail(
+      sendDJGuestListEmail({
+        to: djEmail,
+        artistName: sessionInfo.artistName,
+        sessionTitle: sessionInfo.title,
+        date: sessionInfo.date,
+        startTime: sessionInfo.startTime,
+        endTime: sessionInfo.endTime,
+        tickets: ticketsWithQR,
+      }),
+      `DJ guest list to ${djEmail}`
+    );
 
     return NextResponse.json({
       success: true,

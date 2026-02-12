@@ -3,6 +3,7 @@ import { db, bookings, blackCards, recordingSessions, emailVerificationCodes } f
 import { eq, and, or } from 'drizzle-orm';
 import { requestVerificationSchema } from '@/lib/validations';
 import { sendVerificationCode } from '@/lib/email';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 // Generate 6-digit verification code
 function generateVerificationCode(): string {
@@ -12,6 +13,16 @@ function generateVerificationCode(): string {
 // POST /api/bookings/request-verification - Step 1: Request verification code
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: max 5 verification requests per IP per 15 minutes
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`verification:${ip}`, { maxRequests: 5, windowSeconds: 900 });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) } }
+      );
+    }
     const body = await request.json();
     const validationResult = requestVerificationSchema.safeParse(body);
 
@@ -171,8 +182,8 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    // Send verification email
-    sendVerificationCode({
+    // Send verification email — critical, must succeed for user to proceed
+    const emailResult = await sendVerificationCode({
       to: normalizedEmail,
       guestName,
       sessionTitle: sessionData.title,
@@ -182,7 +193,15 @@ export async function POST(request: NextRequest) {
       endTime: sessionData.endTime,
       verificationCode: code,
       cardCode,
-    }).catch(err => console.error('[API] Verification email failed:', err));
+    });
+
+    if (!emailResult.sent && emailResult.reason !== 'not_configured') {
+      console.error('[API] Verification email failed:', emailResult.error);
+      return NextResponse.json(
+        { error: 'Verification email could not be sent. Please try again.' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       verificationId: verificationRecord[0].id,

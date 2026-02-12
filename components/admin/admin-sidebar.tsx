@@ -18,6 +18,7 @@ const navItems = [
   { href: '/admin/inquiries', label: 'Inquiries' },
   { href: '/admin/applications', label: 'Applications' },
   { href: '/admin/slots', label: 'Recording Slots' },
+  { href: '/admin/users', label: 'Users' },
   { href: '/admin/settings', label: 'Einstellungen' },
 ];
 

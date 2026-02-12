@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, bookings, blackCards, guestListTickets, checkIns, recordingSessions } from '@/db';
 import { eq, and, or } from 'drizzle-orm';
 import { checkInSchema } from '@/lib/validations';
+import { getTodayString } from '@/lib/date-utils';
 
 // POST /api/check-in - Check in via card number or QR code
 export async function POST(request: NextRequest) {
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionData = session[0];
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayString();
 
     if (sessionData.date !== today) {
       return NextResponse.json(

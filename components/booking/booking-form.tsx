@@ -133,11 +133,16 @@ export function BookingForm({
         return;
       }
 
-      setSuccess({
-        message: data.message,
+      // Redirect to confirmation page
+      const params = new URLSearchParams({
         status: data.booking.status,
+        session: sessionTitle,
       });
-      setStep('success');
+      if (data.booking.status === 'waitlist' && data.booking.position) {
+        params.set('position', String(data.booking.position));
+      }
+      router.push(`/booking-confirmed?${params}`);
+      return;
     } catch {
       setError('An error occurred');
     } finally {

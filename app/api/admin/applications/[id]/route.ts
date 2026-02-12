@@ -3,7 +3,7 @@ import { db, recordingApplications, recordingSlots, recordingSessions } from '@/
 import { eq, and, ne } from 'drizzle-orm';
 import { getAdminSession } from '@/lib/admin-auth';
 import { acceptApplicationSchema } from '@/lib/validations';
-import { sendApplicationAccepted, sendApplicationRejected, sendSlotTaken } from '@/lib/email';
+import { sendApplicationAccepted, sendApplicationRejected, sendSlotTaken, fireAndForgetEmail } from '@/lib/email';
 
 export async function PATCH(
   request: NextRequest,
@@ -89,13 +89,16 @@ export async function PATCH(
               .set({ slotId: null })
               .where(eq(recordingApplications.id, other.id));
 
-            sendSlotTaken({
-              to: other.email,
-              artistName: other.artistName,
-              date: slot.date,
-              startTime: slot.startTime,
-              endTime: slot.endTime,
-            }).catch((err) => console.error('[Email] SlotTaken failed:', err));
+            fireAndForgetEmail(
+              sendSlotTaken({
+                to: other.email,
+                artistName: other.artistName,
+                date: slot.date,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+              }),
+              `Slot taken notification to ${other.email}`
+            );
           }
         }
       }
@@ -132,15 +135,18 @@ export async function PATCH(
         .returning();
 
       // Send acceptance email
-      sendApplicationAccepted({
-        to: application.email,
-        artistName: application.artistName,
-        sessionTitle: parsed.data.title,
-        date: slotDate,
-        startTime: slotStartTime,
-        endTime: slotEndTime,
-        sessionId: newSession.id,
-      }).catch((err) => console.error('[Email] AcceptApplication failed:', err));
+      fireAndForgetEmail(
+        sendApplicationAccepted({
+          to: application.email,
+          artistName: application.artistName,
+          sessionTitle: parsed.data.title,
+          date: slotDate,
+          startTime: slotStartTime,
+          endTime: slotEndTime,
+          sessionId: newSession.id,
+        }),
+        `Application accepted to ${application.email}`
+      );
 
       return NextResponse.json({ ...updated, sessionId: newSession.id });
     }
@@ -153,10 +159,13 @@ export async function PATCH(
         .where(eq(recordingApplications.id, id))
         .returning();
 
-      sendApplicationRejected({
-        to: application.email,
-        artistName: application.artistName,
-      }).catch((err) => console.error('[Email] RejectApplication failed:', err));
+      fireAndForgetEmail(
+        sendApplicationRejected({
+          to: application.email,
+          artistName: application.artistName,
+        }),
+        `Application rejected to ${application.email}`
+      );
 
       return NextResponse.json(updated);
     }

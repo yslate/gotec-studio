@@ -2,11 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, bookings, blackCards, recordingSessions, emailVerificationCodes } from '@/db';
 import { eq, and, sql, or } from 'drizzle-orm';
 import { verifyAndBookSchema } from '@/lib/validations';
-import { sendBookingConfirmation } from '@/lib/email';
+import { sendBookingConfirmation, fireAndForgetEmail } from '@/lib/email';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 // POST /api/bookings/verify - Step 2: Verify code and complete booking
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: max 10 verify attempts per IP per 15 minutes (brute-force protection)
+    const ip = getClientIp(request);
+    const rateLimit = checkRateLimit(`verify:${ip}`, { maxRequests: 10, windowSeconds: 900 });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) } }
+      );
+    }
+
     const body = await request.json();
     const validationResult = verifyAndBookSchema.safeParse(body);
 
@@ -109,114 +121,138 @@ export async function POST(request: NextRequest) {
 
     const sessionData = session[0];
 
-    // Re-check for duplicate bookings (might have changed since verification request)
-    const existingBooking = await db
-      .select()
-      .from(bookings)
-      .where(
-        and(
-          eq(bookings.sessionId, verificationData.sessionId),
-          or(
-            eq(bookings.cardId, cardData.id),
-            eq(bookings.guestEmail, verificationData.email)
-          ),
-          or(
-            eq(bookings.status, 'confirmed'),
-            eq(bookings.status, 'waitlist'),
-            eq(bookings.status, 'checked_in')
+    // Use a transaction with row-level lock to prevent race conditions
+    // This ensures capacity check + insert are atomic
+    const txResult = await db.transaction(async (tx) => {
+      // Lock the session row to serialize concurrent booking attempts
+      const lockedSession = await tx.execute(
+        sql`SELECT * FROM ${recordingSessions} WHERE id = ${verificationData.sessionId} FOR UPDATE LIMIT 1`
+      );
+
+      if (!lockedSession.rows.length) {
+        return { error: 'Session not found', status: 404 } as const;
+      }
+
+      const lockedSessionData = lockedSession.rows[0] as typeof sessionData;
+
+      // Re-check for duplicate bookings within transaction
+      const existingBooking = await tx
+        .select()
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.sessionId, verificationData.sessionId),
+            or(
+              eq(bookings.cardId, cardData.id),
+              eq(bookings.guestEmail, verificationData.email)
+            ),
+            or(
+              eq(bookings.status, 'confirmed'),
+              eq(bookings.status, 'waitlist'),
+              eq(bookings.status, 'checked_in')
+            )
           )
         )
-      )
-      .limit(1);
+        .limit(1);
 
-    if (existingBooking.length) {
+      if (existingBooking.length) {
+        return { error: 'A booking already exists for this card or email', status: 400 } as const;
+      }
+
+      // Count current confirmed bookings
+      const confirmedCount = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.sessionId, verificationData.sessionId),
+            or(
+              eq(bookings.status, 'confirmed'),
+              eq(bookings.status, 'checked_in')
+            )
+          )
+        );
+
+      const currentConfirmed = confirmedCount[0]?.count || 0;
+
+      // Count current waitlist
+      const waitlistCount = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.sessionId, verificationData.sessionId),
+            eq(bookings.status, 'waitlist')
+          )
+        );
+
+      const currentWaitlist = waitlistCount[0]?.count || 0;
+
+      // Determine booking status
+      let bookingStatus: 'confirmed' | 'waitlist';
+      let position: number | null = null;
+
+      if (currentConfirmed < lockedSessionData.maxCardholders) {
+        bookingStatus = 'confirmed';
+      } else if (currentWaitlist < lockedSessionData.maxWaitlist) {
+        bookingStatus = 'waitlist';
+        position = currentWaitlist + 1;
+      } else {
+        return { error: 'This session is unfortunately full', status: 400 } as const;
+      }
+
+      // Create the booking
+      const newBooking = await tx
+        .insert(bookings)
+        .values({
+          sessionId: verificationData.sessionId,
+          cardId: cardData.id,
+          guestName: verificationData.guestName,
+          guestEmail: verificationData.email,
+          guestPhone: verificationData.guestPhone,
+          status: bookingStatus,
+          position,
+        })
+        .returning();
+
+      // Mark verification as used
+      await tx
+        .update(emailVerificationCodes)
+        .set({ verified: true })
+        .where(eq(emailVerificationCodes.id, verificationId));
+
+      return { booking: newBooking[0], bookingStatus, position } as const;
+    });
+
+    // Handle transaction errors
+    if ('error' in txResult) {
       return NextResponse.json(
-        { error: 'A booking already exists for this card or email' },
-        { status: 400 }
+        { error: txResult.error },
+        { status: txResult.status }
       );
     }
 
-    // Count current confirmed bookings
-    const confirmedCount = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(bookings)
-      .where(
-        and(
-          eq(bookings.sessionId, verificationData.sessionId),
-          or(
-            eq(bookings.status, 'confirmed'),
-            eq(bookings.status, 'checked_in')
-          )
-        )
-      );
-
-    const currentConfirmed = confirmedCount[0]?.count || 0;
-
-    // Count current waitlist
-    const waitlistCount = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(bookings)
-      .where(
-        and(
-          eq(bookings.sessionId, verificationData.sessionId),
-          eq(bookings.status, 'waitlist')
-        )
-      );
-
-    const currentWaitlist = waitlistCount[0]?.count || 0;
-
-    // Determine booking status
-    let bookingStatus: 'confirmed' | 'waitlist';
-    let position: number | null = null;
-
-    if (currentConfirmed < sessionData.maxCardholders) {
-      bookingStatus = 'confirmed';
-    } else if (currentWaitlist < sessionData.maxWaitlist) {
-      bookingStatus = 'waitlist';
-      position = currentWaitlist + 1;
-    } else {
-      return NextResponse.json(
-        { error: 'This session is unfortunately full' },
-        { status: 400 }
-      );
-    }
-
-    // Create the booking
-    const newBooking = await db
-      .insert(bookings)
-      .values({
-        sessionId: verificationData.sessionId,
-        cardId: cardData.id,
-        guestName: verificationData.guestName,
-        guestEmail: verificationData.email,
-        guestPhone: verificationData.guestPhone,
-        status: bookingStatus,
-        position,
-      })
-      .returning();
-
-    // Mark verification as used
-    await db
-      .update(emailVerificationCodes)
-      .set({ verified: true })
-      .where(eq(emailVerificationCodes.id, verificationId));
+    const { booking: newBooking, bookingStatus, position } = txResult;
 
     // Send confirmation email
-    sendBookingConfirmation({
-      to: verificationData.email,
-      guestName: verificationData.guestName,
-      sessionTitle: sessionData.title,
-      artistName: sessionData.artistName,
-      date: sessionData.date,
-      startTime: sessionData.startTime,
-      endTime: sessionData.endTime,
-      cardNumber: cardData.cardNumber,
-      status: bookingStatus,
-      position: position ?? undefined,
-    }).catch(err => console.error('[API] Email send failed:', err));
+    fireAndForgetEmail(
+      sendBookingConfirmation({
+        to: verificationData.email,
+        guestName: verificationData.guestName,
+        sessionTitle: sessionData.title,
+        artistName: sessionData.artistName,
+        date: sessionData.date,
+        startTime: sessionData.startTime,
+        endTime: sessionData.endTime,
+        cardNumber: cardData.cardNumber,
+        status: bookingStatus,
+        position: position ?? undefined,
+      }),
+      `Booking confirmation to ${verificationData.email}`
+    );
 
     return NextResponse.json({
-      booking: newBooking[0],
+      booking: newBooking,
       message: bookingStatus === 'confirmed'
         ? 'Booking successfully confirmed!'
         : `You are on the waitlist (position ${position})`,

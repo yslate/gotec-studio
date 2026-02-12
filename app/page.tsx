@@ -2,10 +2,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SiteHeader } from '@/components/site-header';
 import { Footer } from '@/components/footer';
+import { HeroBackground } from '@/components/hero-background';
 import { getSettings } from '@/lib/settings';
 
 export default async function HomePage() {
   const s = await getSettings([
+    'homepage.hero.backgroundType',
+    'homepage.hero.imageUrl',
     'homepage.hero.tagline',
     'homepage.hero.cta',
     'homepage.about.title',
@@ -29,12 +32,9 @@ export default async function HomePage() {
 
       {/* Hero Section - pulls up behind the transparent header */}
       <section className="relative h-[70vh] min-h-[400px] flex items-center justify-center overflow-hidden -mt-[57px]">
-        <Image
-          src="/hero.jpg"
-          alt="GOTEC Records Studio"
-          fill
-          className="object-cover"
-          priority
+        <HeroBackground
+          backgroundType={s['homepage.hero.backgroundType']}
+          imageUrl={s['homepage.hero.imageUrl']}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
         <div className="relative z-10 container mx-auto px-4 text-center flex flex-col items-center gap-8">

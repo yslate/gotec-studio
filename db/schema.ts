@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, integer, boolean, timestamp, text, pgEnum, uuid, date, time } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, integer, boolean, timestamp, text, pgEnum, uuid, date, time, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Enums
@@ -48,7 +48,9 @@ export const emailVerificationCodes = pgTable('email_verification_codes', {
   verified: boolean('verified').notNull().default(false),
   expiresAt: timestamp('expires_at').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+}, (table) => [
+  index('verification_expires_idx').on(table.expiresAt),
+]);
 
 // Recording Sessions table
 export const recordingSessions = pgTable('recording_sessions', {
@@ -66,7 +68,10 @@ export const recordingSessions = pgTable('recording_sessions', {
   isCancelled: boolean('is_cancelled').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+}, (table) => [
+  index('sessions_date_idx').on(table.date),
+  index('sessions_published_idx').on(table.isPublished),
+]);
 
 // Bookings table - Cardholder bookings
 export const bookings = pgTable('bookings', {
@@ -81,7 +86,13 @@ export const bookings = pgTable('bookings', {
   checkedInAt: timestamp('checked_in_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+}, (table) => [
+  index('bookings_session_id_idx').on(table.sessionId),
+  index('bookings_card_id_idx').on(table.cardId),
+  index('bookings_status_idx').on(table.status),
+  index('bookings_guest_email_idx').on(table.guestEmail),
+  index('bookings_session_status_idx').on(table.sessionId, table.status),
+]);
 
 // Guest List Tickets table - GL tickets with QR codes
 export const guestListTickets = pgTable('guest_list_tickets', {
@@ -95,7 +106,11 @@ export const guestListTickets = pgTable('guest_list_tickets', {
   status: ticketStatusEnum('status').notNull().default('valid'),
   usedAt: timestamp('used_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+}, (table) => [
+  index('gl_tickets_session_id_idx').on(table.sessionId),
+  index('gl_tickets_status_idx').on(table.status),
+  index('gl_tickets_session_status_idx').on(table.sessionId, table.status),
+]);
 
 // Check-ins table - Records of all check-ins
 export const checkIns = pgTable('check_ins', {
@@ -106,7 +121,9 @@ export const checkIns = pgTable('check_ins', {
   checkedInBy: uuid('checked_in_by').references(() => users.id),
   type: varchar('type', { length: 20 }).notNull(), // 'cardholder' or 'guest_list'
   checkedInAt: timestamp('checked_in_at').notNull().defaultNow(),
-});
+}, (table) => [
+  index('check_ins_session_id_idx').on(table.sessionId),
+]);
 
 // Contact Inquiries table
 export const contactInquiries = pgTable('contact_inquiries', {
@@ -221,7 +238,7 @@ export const siteSettings = pgTable('site_settings', {
   key: varchar('key', { length: 255 }).primaryKey(),
   value: text('value').notNull(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  updatedBy: uuid('updated_by').references(() => users.id),
+  updatedBy: text('updated_by'),
 });
 
 // Type exports

@@ -3,6 +3,7 @@ import { db, recordingSessions, bookings, guestListTickets, checkIns } from '@/d
 import { sql, desc } from 'drizzle-orm';
 import { getAdminSession } from '@/lib/admin-auth';
 import { createSessionSchema } from '@/lib/validations';
+import { getTodayString } from '@/lib/date-utils';
 
 // GET /api/admin/sessions - Get all sessions with stats
 export async function GET() {
@@ -79,6 +80,15 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json(
         { error: 'Invalid data', details: validationResult.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    // Prevent creating sessions in the past
+    const today = getTodayString();
+    if (validationResult.data.date < today) {
+      return NextResponse.json(
+        { error: 'Session date cannot be in the past' },
         { status: 400 }
       );
     }

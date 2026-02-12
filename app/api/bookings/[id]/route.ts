@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, bookings, recordingSessions, blackCards } from '@/db';
 import { eq, and } from 'drizzle-orm';
-import { sendCancellationNotification, sendWaitlistPromotion } from '@/lib/email';
+import { sendCancellationNotification, sendWaitlistPromotion, fireAndForgetEmail } from '@/lib/email';
 
 // DELETE /api/bookings/[id] - Cancel a booking
 export async function DELETE(
@@ -94,14 +94,17 @@ export async function DELETE(
 
     // Send cancellation email
     if (bookingData.guestEmail) {
-      sendCancellationNotification({
-        to: bookingData.guestEmail,
-        guestName: bookingData.guestName,
-        sessionTitle: bookingData.session.title,
-        artistName: bookingData.session.artistName,
-        date: bookingData.session.date,
-        cancelledByUser: true,
-      }).catch(err => console.error('[API] Cancellation email failed:', err));
+      fireAndForgetEmail(
+        sendCancellationNotification({
+          to: bookingData.guestEmail,
+          guestName: bookingData.guestName,
+          sessionTitle: bookingData.session.title,
+          artistName: bookingData.session.artistName,
+          date: bookingData.session.date,
+          cancelledByUser: true,
+        }),
+        `Cancellation notification to ${bookingData.guestEmail}`
+      );
     }
 
     // If the cancelled booking was confirmed, promote the first waitlisted booking
@@ -144,16 +147,19 @@ export async function DELETE(
 
         // Send waitlist promotion email
         if (promotedBooking.guestEmail) {
-          sendWaitlistPromotion({
-            to: promotedBooking.guestEmail,
-            guestName: promotedBooking.guestName,
-            sessionTitle: bookingData.session.title,
-            artistName: bookingData.session.artistName,
-            date: bookingData.session.date,
-            startTime: bookingData.session.startTime,
-            endTime: bookingData.session.endTime,
-            cardNumber: promotedCard[0]?.cardNumber || 0,
-          }).catch(err => console.error('[API] Waitlist promotion email failed:', err));
+          fireAndForgetEmail(
+            sendWaitlistPromotion({
+              to: promotedBooking.guestEmail,
+              guestName: promotedBooking.guestName,
+              sessionTitle: bookingData.session.title,
+              artistName: bookingData.session.artistName,
+              date: bookingData.session.date,
+              startTime: bookingData.session.startTime,
+              endTime: bookingData.session.endTime,
+              cardNumber: promotedCard[0]?.cardNumber || 0,
+            }),
+            `Waitlist promotion to ${promotedBooking.guestEmail}`
+          );
         }
 
         // Update positions of remaining waitlist

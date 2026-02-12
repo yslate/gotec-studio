@@ -46,7 +46,7 @@ export default function AdminCheckInPage() {
       if (res.ok) {
         const data = await res.json();
         // Filter to only today's sessions
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' });
         const todaySessions = data.filter((s: Session) => s.date === today);
         setSessions(todaySessions);
 

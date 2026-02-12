@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db, recordingSlots } from '@/db';
 import { eq, gte, asc } from 'drizzle-orm';
+import { getTodayString } from '@/lib/date-utils';
 
 export async function GET() {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayString();
 
     const slots = await db
       .select({

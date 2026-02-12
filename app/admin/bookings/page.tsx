@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { generateCheckInListPDF } from '@/lib/pdf-export';
+import { exportBookingsCSV } from '@/lib/csv-export';
 
 interface Session {
   id: string;
@@ -44,7 +45,20 @@ export default function AdminBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [exportLoading, setExportLoading] = useState(false);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset to first page on new search
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   // Fetch upcoming sessions
   useEffect(() => {
@@ -58,7 +72,7 @@ export default function AdminBookingsPage() {
     fetchSessions();
   }, []);
 
-  // Fetch bookings
+  // Fetch bookings with pagination and server-side search
   useEffect(() => {
     async function fetchBookings() {
       setLoading(true);
@@ -71,16 +85,28 @@ export default function AdminBookingsPage() {
       } else {
         params.set('upcoming', 'true');
       }
+      if (debouncedSearch) {
+        params.set('search', debouncedSearch);
+      }
+      params.set('page', String(page));
+      params.set('limit', '50');
 
       const res = await fetch(`/api/admin/bookings?${params}`);
       if (res.ok) {
-        const data = await res.json();
-        setBookings(data);
+        const result = await res.json();
+        setBookings(result.data);
+        setTotalPages(result.pagination.totalPages);
+        setTotal(result.pagination.total);
       }
       setLoading(false);
     }
 
     fetchBookings();
+  }, [filter, selectedSession, debouncedSearch, page]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
   }, [filter, selectedSession]);
 
   async function handleExportPDF() {
@@ -123,17 +149,6 @@ export default function AdminBookingsPage() {
     }
   }
 
-  const filteredBookings = bookings.filter((booking) => {
-    if (!search) return true;
-    const searchLower = search.toLowerCase();
-    return (
-      booking.guestName.toLowerCase().includes(searchLower) ||
-      booking.guestPhone.includes(search) ||
-      booking.card.cardNumber.toString() === search ||
-      booking.session.title.toLowerCase().includes(searchLower)
-    );
-  });
-
   function getStatusBadge(status: string) {
     switch (status) {
       case 'confirmed':
@@ -153,9 +168,13 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold">Bookings</h1>
-        <p className="text-xs text-muted-foreground">Manage all bookings</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Bookings</h1>
+          <p className="text-xs text-muted-foreground">
+            {total > 0 ? `${total} bookings found` : 'Manage all bookings'}
+          </p>
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -178,6 +197,25 @@ export default function AdminBookingsPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="sm:max-w-xs"
           />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportBookingsCSV(
+              bookings.map(b => ({
+                guestName: b.guestName,
+                guestPhone: b.guestPhone,
+                cardNumber: b.card.cardNumber,
+                sessionTitle: b.session.title,
+                sessionDate: b.session.date,
+                status: b.status,
+                createdAt: new Date(b.createdAt).toLocaleDateString('en-US'),
+              }))
+            )}
+            disabled={bookings.length === 0}
+            className="text-xs"
+          >
+            CSV Export
+          </Button>
           {selectedSession && (
             <Button
               variant="outline"
@@ -211,7 +249,7 @@ export default function AdminBookingsPage() {
         <div className="text-center py-8">
           <p className="text-muted-foreground text-sm">Loading bookings...</p>
         </div>
-      ) : filteredBookings.length === 0 ? (
+      ) : bookings.length === 0 ? (
         <div className="text-center py-8 border border-dashed">
           <p className="text-muted-foreground text-sm">No bookings found</p>
         </div>
@@ -229,7 +267,7 @@ export default function AdminBookingsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredBookings.map((booking) => (
+              {bookings.map((booking) => (
                 <tr key={booking.id} className="border-t">
                   <td className="p-3">
                     <div>
@@ -265,6 +303,33 @@ export default function AdminBookingsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-xs">
+          <p className="text-muted-foreground">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
     </div>

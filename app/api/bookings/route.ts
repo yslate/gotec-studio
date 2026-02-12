@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, bookings, blackCards, recordingSessions } from '@/db';
 import { eq, and, sql, or } from 'drizzle-orm';
 import { createBookingSchema, lookupBookingsSchema } from '@/lib/validations';
-import { sendBookingConfirmation } from '@/lib/email';
+import { sendBookingConfirmation, fireAndForgetEmail } from '@/lib/email';
 
 // POST /api/bookings - Create a new booking
 export async function POST(request: NextRequest) {
@@ -172,18 +172,21 @@ export async function POST(request: NextRequest) {
       .returning();
 
     // Send confirmation email (required - email is mandatory now)
-    sendBookingConfirmation({
-      to: guestEmail,
-      guestName,
-      sessionTitle: sessionData.title,
-      artistName: sessionData.artistName,
-      date: sessionData.date,
-      startTime: sessionData.startTime,
-      endTime: sessionData.endTime,
-      cardNumber,
-      status: bookingStatus,
-      position: position ?? undefined,
-    }).catch(err => console.error('[API] Email send failed:', err));
+    fireAndForgetEmail(
+      sendBookingConfirmation({
+        to: guestEmail,
+        guestName,
+        sessionTitle: sessionData.title,
+        artistName: sessionData.artistName,
+        date: sessionData.date,
+        startTime: sessionData.startTime,
+        endTime: sessionData.endTime,
+        cardNumber,
+        status: bookingStatus,
+        position: position ?? undefined,
+      }),
+      `Booking confirmation to ${guestEmail}`
+    );
 
     return NextResponse.json({
       booking: newBooking[0],

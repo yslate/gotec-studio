@@ -78,16 +78,31 @@ function GroupSection({
 
       {open && (
         <div className="px-4 pb-4 pt-2 border-t space-y-4">
-          {definitions.map((def) => (
-            <SettingsTextField
-              key={def.key}
-              label={def.label}
-              value={settings[def.key] ?? def.defaultValue}
-              maxLength={def.maxLength}
-              type={def.type}
-              onChange={(val) => onSettingsChange({ ...settings, [def.key]: val })}
-            />
-          ))}
+          {definitions.map((def) =>
+            def.type === 'select' && def.options ? (
+              <div key={def.key} className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground/80">{def.label}</label>
+                <select
+                  value={settings[def.key] ?? def.defaultValue}
+                  onChange={(e) => onSettingsChange({ ...settings, [def.key]: e.target.value })}
+                  className="flex h-10 w-full border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  {def.options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <SettingsTextField
+                key={def.key}
+                label={def.label}
+                value={settings[def.key] ?? def.defaultValue}
+                maxLength={def.maxLength}
+                type={def.type === 'select' ? 'short' : def.type}
+                onChange={(val) => onSettingsChange({ ...settings, [def.key]: val })}
+              />
+            )
+          )}
 
           <div className="flex items-center gap-3 pt-2">
             <Button size="sm" onClick={handleSave} disabled={saving}>

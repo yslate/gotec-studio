@@ -5,11 +5,34 @@ export interface SettingDefinition {
   label: string;
   category: 'page-content';
   group: string;
-  type: 'short' | 'long';
+  type: 'short' | 'long' | 'select';
+  options?: { value: string; label: string }[];
 }
 
 export const SETTING_DEFINITIONS: SettingDefinition[] = [
   // ─── Homepage ───────────────────────────────────────────
+  {
+    key: 'homepage.hero.backgroundType',
+    defaultValue: 'video',
+    label: 'Hero Background',
+    maxLength: 10,
+    category: 'page-content',
+    group: 'Homepage',
+    type: 'select',
+    options: [
+      { value: 'video', label: 'YouTube Video (Latest)' },
+      { value: 'image', label: 'Custom Image' },
+    ],
+  },
+  {
+    key: 'homepage.hero.imageUrl',
+    defaultValue: '',
+    label: 'Hero Image URL',
+    maxLength: 500,
+    category: 'page-content',
+    group: 'Homepage',
+    type: 'short',
+  },
   {
     key: 'homepage.hero.tagline',
     defaultValue: 'DJ Recording Studio \u2014 Karlsruhe',

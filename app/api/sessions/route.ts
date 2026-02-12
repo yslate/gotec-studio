@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { db, recordingSessions, bookings } from '@/db';
 import { eq, and, gte, sql } from 'drizzle-orm';
+import { getTodayString } from '@/lib/date-utils';
 
 // GET /api/sessions - Get available (published, not cancelled, future) sessions
 export async function GET() {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayString();
 
     const sessions = await db
       .select({

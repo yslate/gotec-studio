@@ -79,7 +79,7 @@ export default function AdminGLTicketsPage() {
     if (res.ok) {
       const data = await res.json();
       // Filter to only upcoming sessions
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' });
       const upcoming = data.filter((s: Session) => s.date >= today);
       setSessions(upcoming);
     }
