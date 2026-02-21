@@ -737,6 +737,125 @@ export async function sendVerificationCode(data: VerificationCodeData) {
 }
 
 // ============================================
+// APPLICATION REJECTION
+// ============================================
+
+interface ApplicationRejectionData {
+  to: string;
+  artistName: string;
+  rejectionReason?: string;
+}
+
+export async function sendApplicationRejection(data: ApplicationRejectionData) {
+  if (!client) {
+    console.log('[Email] Postmark not configured, skipping application rejection:', data.to);
+    return { sent: false, reason: 'not_configured' };
+  }
+
+  const subject = 'Your Application — GOTEC Records';
+
+  const htmlBody = `
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <div style="display: none; max-height: 0; overflow: hidden;">Update regarding your application at GOTEC Records.</div>
+
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #0a0a0a;">
+    <tr>
+      <td align="center" style="padding: 60px 24px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="480" style="max-width: 480px; width: 100%;">
+
+          <!-- Logo -->
+          <tr>
+            <td style="padding-bottom: 48px;">
+              <p style="margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4);">
+                GOTEC Records
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td>
+              <p style="margin: 0 0 24px 0; font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.7;">
+                Hi ${data.artistName},
+              </p>
+
+              <p style="margin: 0 0 24px 0; font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.7;">
+                Thank you for your interest in GOTEC Records. After reviewing your application, we've decided not to move forward at this time.
+              </p>
+
+              ${data.rejectionReason ? `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
+                <tr>
+                  <td style="border-left: 1px solid rgba(255,255,255,0.12); padding: 0 0 0 20px;">
+                    <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.7; white-space: pre-wrap;">${data.rejectionReason}</p>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              <p style="margin: 0 0 40px 0; font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.7;">
+                You're welcome to reapply anytime if things change on your end.
+              </p>
+
+              <!-- Button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td style="border: 1px solid rgba(255,255,255,0.15);">
+                    <a href="${APP_URL}/apply" target="_blank" style="display: block; padding: 12px 28px; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.7); text-decoration: none;">
+                      Apply again
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top: 60px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px;">
+                    <p style="margin: 0; font-size: 11px; color: rgba(255,255,255,0.25);">
+                      GOTEC Records &mdash; Karlsruhe
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+
+  try {
+    await client.sendEmail({
+      From: FROM_EMAIL,
+      To: data.to,
+      Subject: subject,
+      HtmlBody: htmlBody,
+      MessageStream: 'outbound',
+    });
+    console.log('[Email] Application rejection sent to:', data.to);
+    return { sent: true };
+  } catch (error) {
+    console.error('[Email] Failed to send application rejection:', error);
+    return { sent: false, error };
+  }
+}
+
+// ============================================
 // UTILITY FUNCTION: Check if email is configured
 // ============================================
 

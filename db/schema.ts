@@ -129,6 +129,7 @@ export const recordingApplications = pgTable('recording_applications', {
   soundcloudUrl: varchar('soundcloud_url', { length: 500 }),
   message: text('message').notNull(),
   status: applicationStatusEnum('status').notNull().default('new'),
+  rejectionReason: text('rejection_reason'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 

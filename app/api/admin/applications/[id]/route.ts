@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, recordingApplications } from '@/db';
 import { eq } from 'drizzle-orm';
 import { getAdminSession } from '@/lib/admin-auth';
+import { sendApplicationRejection } from '@/lib/email';
 
 export async function PATCH(
   request: NextRequest,
@@ -15,7 +16,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { status } = body;
+    const { status, rejectionReason } = body;
 
     if (!status || !['new', 'reviewed', 'accepted', 'rejected'].includes(status)) {
       return NextResponse.json(
@@ -24,9 +25,17 @@ export async function PATCH(
       );
     }
 
+    const updateData: Record<string, unknown> = { status };
+    if (status === 'rejected' && rejectionReason) {
+      updateData.rejectionReason = rejectionReason;
+    }
+    if (status !== 'rejected') {
+      updateData.rejectionReason = null;
+    }
+
     const [updated] = await db
       .update(recordingApplications)
-      .set({ status })
+      .set(updateData)
       .where(eq(recordingApplications.id, id))
       .returning();
 
@@ -35,6 +44,14 @@ export async function PATCH(
         { error: 'Application not found' },
         { status: 404 }
       );
+    }
+
+    if (status === 'rejected') {
+      sendApplicationRejection({
+        to: updated.email,
+        artistName: updated.artistName,
+        rejectionReason: updated.rejectionReason || undefined,
+      }).catch((err) => console.error('Failed to send rejection email:', err));
     }
 
     return NextResponse.json(updated);

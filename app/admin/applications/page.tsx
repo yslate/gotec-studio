@@ -14,6 +14,7 @@ interface Application {
   soundcloudUrl: string | null;
   message: string;
   status: 'new' | 'reviewed' | 'accepted' | 'rejected';
+  rejectionReason: string | null;
   createdAt: string;
 }
 
@@ -36,6 +37,8 @@ export default function AdminApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState<Application | null>(null);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   useEffect(() => {
     async function fetchApplications() {
@@ -50,17 +53,28 @@ export default function AdminApplicationsPage() {
     fetchApplications();
   }, []);
 
-  async function updateStatus(id: string, status: string) {
+  async function updateStatus(id: string, status: string, reason?: string) {
+    const body: Record<string, string> = { status };
+    if (status === 'rejected' && reason) {
+      body.rejectionReason = reason;
+    }
     const res = await fetch(`/api/admin/applications/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       const updated = await res.json();
       setApplications((prev) => prev.map((a) => (a.id === id ? updated : a)));
       if (selected?.id === id) setSelected(updated);
     }
+  }
+
+  function handleReject() {
+    if (!selected) return;
+    updateStatus(selected.id, 'rejected', rejectionReason.trim() || undefined);
+    setShowRejectDialog(false);
+    setRejectionReason('');
   }
 
   const filtered = filter === 'all'
@@ -229,12 +243,52 @@ export default function AdminApplicationsPage() {
                     size="sm"
                     variant="outline"
                     className="text-xs"
-                    onClick={() => updateStatus(selected.id, 'rejected')}
+                    onClick={() => {
+                      setRejectionReason('');
+                      setShowRejectDialog(true);
+                    }}
                   >
                     Ablehnen
                   </Button>
                 )}
               </div>
+
+              {selected.status === 'rejected' && selected.rejectionReason && (
+                <div className="border-t pt-4">
+                  <p className="text-xs text-muted-foreground mb-1">Ablehnungsgrund:</p>
+                  <p className="text-sm whitespace-pre-wrap">{selected.rejectionReason}</p>
+                </div>
+              )}
+
+              {showRejectDialog && (
+                <div className="border-t pt-4 space-y-3">
+                  <p className="text-xs font-medium">Bewerbung ablehnen</p>
+                  <textarea
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    placeholder="Grund für die Ablehnung (optional)"
+                    className="w-full border rounded-md p-2 text-sm min-h-[80px] resize-y bg-background"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="text-xs"
+                      onClick={handleReject}
+                    >
+                      Ablehnen
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs"
+                      onClick={() => setShowRejectDialog(false)}
+                    >
+                      Abbrechen
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
