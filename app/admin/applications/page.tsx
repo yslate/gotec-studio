@@ -24,6 +24,7 @@ interface Application {
   message: string;
   slotId: string | null;
   status: 'new' | 'reviewed' | 'accepted' | 'rejected';
+  rejectionReason: string | null;
   createdAt: string;
   slotDate: string | null;
   slotStartTime: string | null;
@@ -84,6 +85,7 @@ export default function AdminApplicationsPage() {
 
   // Reject dialog state
   const [showReject, setShowReject] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
   const [rejecting, setRejecting] = useState(false);
 
   // Reassign dialog state
@@ -172,14 +174,20 @@ export default function AdminApplicationsPage() {
     if (!selected) return;
     setRejecting(true);
 
+    const body: Record<string, string> = { status: 'rejected' };
+    if (rejectionReason.trim()) {
+      body.rejectionReason = rejectionReason.trim();
+    }
+
     const res = await fetch(`/api/admin/applications/${selected.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'rejected' }),
+      body: JSON.stringify(body),
     });
 
     if (res.ok) {
       setShowReject(false);
+      setRejectionReason('');
       fetchApplications();
       setSelected(null);
     }
@@ -402,7 +410,10 @@ export default function AdminApplicationsPage() {
                     size="sm"
                     variant="destructive"
                     className="text-xs"
-                    onClick={() => setShowReject(true)}
+                    onClick={() => {
+                      setRejectionReason('');
+                      setShowReject(true);
+                    }}
                   >
                     Reject
                   </Button>
@@ -418,6 +429,13 @@ export default function AdminApplicationsPage() {
                   </Button>
                 )}
               </div>
+
+              {selected.status === 'rejected' && selected.rejectionReason && (
+                <div className="border-t pt-4">
+                  <p className="text-xs text-muted-foreground mb-1">Rejection reason:</p>
+                  <p className="text-sm whitespace-pre-wrap">{selected.rejectionReason}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -522,6 +540,15 @@ export default function AdminApplicationsPage() {
               A rejection email will be sent to {selected?.artistName} ({selected?.email}).
             </DialogDescription>
           </DialogHeader>
+          <div className="py-4">
+            <label className="block text-sm text-muted-foreground mb-2">Rejection reason (optional)</label>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Reason for rejection..."
+              className="flex w-full border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[80px] resize-y"
+            />
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReject(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleReject} disabled={rejecting}>

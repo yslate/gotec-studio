@@ -40,7 +40,7 @@ function emailWrapper(content: string, previewText: string = '') {
   </noscript>
   <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; background-color: ${COLORS.background}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: ${COLORS.text}; line-height: 1.6;">
+<body style="margin: 0; padding: 0; background-color: ${COLORS.background}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: ${COLORS.text}; line-height: 1.6;">
   ${previewText ? `<div style="display: none; max-height: 0; overflow: hidden;">${previewText}</div>` : ''}
 
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.background};">
@@ -937,6 +937,7 @@ export async function sendApplicationAccepted(data: ApplicationAcceptedData) {
 interface ApplicationRejectedData {
   to: string;
   artistName: string;
+  rejectionReason?: string;
 }
 
 export async function sendApplicationRejected(data: ApplicationRejectedData) {
@@ -959,6 +960,16 @@ export async function sendApplicationRejected(data: ApplicationRejectedData) {
     <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
       Unfortunately, we cannot offer you a recording slot at this time. We received many strong applications and the selection was not easy.
     </p>
+
+    ${data.rejectionReason ? `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 24px 0;">
+      <tr>
+        <td style="border-left: 2px solid ${COLORS.border}; padding: 0 0 0 16px;">
+          <p style="margin: 0; font-size: 13px; color: ${COLORS.textMuted}; white-space: pre-wrap;">${data.rejectionReason}</p>
+        </td>
+      </tr>
+    </table>
+    ` : ''}
 
     <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
       Feel free to reapply when new slots become available. We wish you continued success!

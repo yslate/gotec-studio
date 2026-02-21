@@ -17,7 +17,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { status } = body;
+    const { status, rejectionReason } = body;
 
     if (!status || !['new', 'reviewed', 'accepted', 'rejected'].includes(status)) {
       return NextResponse.json(
@@ -153,9 +153,14 @@ export async function PATCH(
 
     // --- REJECT ---
     if (status === 'rejected') {
+      const updateData: Record<string, unknown> = { status: 'rejected' };
+      if (rejectionReason) {
+        updateData.rejectionReason = rejectionReason;
+      }
+
       const [updated] = await db
         .update(recordingApplications)
-        .set({ status: 'rejected' })
+        .set(updateData)
         .where(eq(recordingApplications.id, id))
         .returning();
 
@@ -163,6 +168,7 @@ export async function PATCH(
         sendApplicationRejected({
           to: application.email,
           artistName: application.artistName,
+          rejectionReason: rejectionReason || undefined,
         }),
         `Application rejected to ${application.email}`
       );

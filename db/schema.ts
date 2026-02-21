@@ -158,6 +158,7 @@ export const recordingApplications = pgTable('recording_applications', {
   message: text('message').notNull(),
   slotId: uuid('slot_id').references(() => recordingSlots.id, { onDelete: 'set null' }),
   status: applicationStatusEnum('status').notNull().default('new'),
+  rejectionReason: text('rejection_reason'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
