@@ -7,19 +7,18 @@ const client = process.env.POSTMARK_API_KEY
 const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@gotec-records.de';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-// Brand colors matching the site
-const COLORS = {
-  background: '#1a1a1a',
-  cardBg: '#242424',
-  primary: '#6E2931',
-  primaryHover: '#8a3540',
-  text: '#e5e5e5',
-  textMuted: '#a3a3a3',
-  border: 'rgba(255,255,255,0.1)',
-  white: '#ffffff',
+// Minimal palette matching the dark homepage
+const C = {
+  bg: '#141414',
+  text: '#d4d4d4',
+  muted: '#737373',
+  white: '#fafafa',
+  rule: 'rgba(255,255,255,0.08)',
+  accent: '#6E2931',
 };
 
-// Base email template wrapper
+// ── Shared components ────────────────────────
+
 function emailWrapper(content: string, previewText: string = '') {
   return `
 <!DOCTYPE html>
@@ -28,7 +27,7 @@ function emailWrapper(content: string, previewText: string = '') {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>GOTEC DJ-Studio</title>
+  <title>GOTEC Records</title>
   ${previewText ? `<meta name="description" content="${previewText}">` : ''}
   <!--[if mso]>
   <noscript>
@@ -40,47 +39,34 @@ function emailWrapper(content: string, previewText: string = '') {
   </noscript>
   <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; background-color: ${COLORS.background}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: ${COLORS.text}; line-height: 1.6;">
+<body style="margin: 0; padding: 0; background-color: ${C.bg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: ${C.text}; line-height: 1.7; -webkit-font-smoothing: antialiased;">
   ${previewText ? `<div style="display: none; max-height: 0; overflow: hidden;">${previewText}</div>` : ''}
 
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.background};">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${C.bg};">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; width: 100%;">
+      <td align="center" style="padding: 60px 24px 48px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="520" style="max-width: 520px; width: 100%;">
 
           <!-- Header -->
           <tr>
-            <td style="padding-bottom: 32px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: ${COLORS.white}; letter-spacing: 0.5px;">
-                GOTEC DJ-Studio
-              </h1>
-              <p style="margin: 8px 0 0 0; font-size: 12px; color: ${COLORS.textMuted}; text-transform: uppercase; letter-spacing: 1px;">
-                Recording Sessions
+            <td style="padding-bottom: 48px;">
+              <p style="margin: 0; font-size: 11px; font-weight: 600; color: ${C.white}; text-transform: uppercase; letter-spacing: 3px;">
+                GOTEC Records
               </p>
             </td>
           </tr>
 
-          <!-- Main Content Card -->
+          <!-- Content -->
           <tr>
-            <td>
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.cardBg}; border: 1px solid ${COLORS.border};">
-                <tr>
-                  <td style="padding: 32px;">
-                    ${content}
-                  </td>
-                </tr>
-              </table>
-            </td>
+            <td>${content}</td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="padding-top: 32px; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 11px; color: ${COLORS.textMuted};">
-                This email was automatically sent.
-              </p>
-              <p style="margin: 0; font-size: 11px; color: ${COLORS.textMuted};">
-                &copy; ${new Date().getFullYear()} GOTEC Records. All rights reserved.
+            <td style="padding-top: 48px;">
+              <div style="height: 1px; background-color: ${C.rule}; margin-bottom: 24px;"></div>
+              <p style="margin: 0; font-size: 11px; color: ${C.muted}; letter-spacing: 0.3px;">
+                &copy; ${new Date().getFullYear()} GOTEC Records &mdash; Karlsruhe
               </p>
             </td>
           </tr>
@@ -94,13 +80,13 @@ function emailWrapper(content: string, previewText: string = '') {
   `.trim();
 }
 
-// Styled button component
-function emailButton(text: string, url: string, fullWidth: boolean = false) {
+/** Ghost-style button matching the homepage aesthetic */
+function emailButton(text: string, url: string) {
   return `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" ${fullWidth ? 'width="100%"' : ''}>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top: 32px;">
       <tr>
-        <td style="background-color: ${COLORS.primary}; text-align: center;">
-          <a href="${url}" target="_blank" style="display: block; padding: 14px 28px; font-size: 13px; font-weight: 600; color: ${COLORS.white}; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;">
+        <td style="border: 1px solid rgba(255,255,255,0.2); text-align: center;">
+          <a href="${url}" target="_blank" style="display: block; padding: 12px 32px; font-size: 11px; font-weight: 400; color: ${C.white}; text-decoration: none; text-transform: uppercase; letter-spacing: 2px;">
             ${text}
           </a>
         </td>
@@ -109,93 +95,74 @@ function emailButton(text: string, url: string, fullWidth: boolean = false) {
   `;
 }
 
-// Session info box component
-function sessionInfoBox(data: {
+/** Clean session detail block */
+function sessionBlock(data: {
   title: string;
   artistName: string;
   formattedDate: string;
   startTime: string;
   endTime: string;
   cardNumber?: number;
-  ticketCode?: string;
 }) {
   return `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.background}; border-left: 3px solid ${COLORS.primary}; margin: 24px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
       <tr>
-        <td style="padding: 20px;">
-          <h2 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: ${COLORS.white};">
-            ${data.title}
-          </h2>
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-            <tr>
-              <td style="padding: 4px 0; font-size: 13px;">
-                <span style="color: ${COLORS.textMuted};">Artist:</span>
-                <span style="color: ${COLORS.text}; margin-left: 8px;">${data.artistName}</span>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 4px 0; font-size: 13px;">
-                <span style="color: ${COLORS.textMuted};">Date:</span>
-                <span style="color: ${COLORS.text}; margin-left: 8px;">${data.formattedDate}</span>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 4px 0; font-size: 13px;">
-                <span style="color: ${COLORS.textMuted};">Time:</span>
-                <span style="color: ${COLORS.text}; margin-left: 8px;">${data.startTime} – ${data.endTime}</span>
-              </td>
-            </tr>
-            ${data.cardNumber ? `
-            <tr>
-              <td style="padding: 4px 0; font-size: 13px;">
-                <span style="color: ${COLORS.textMuted};">Black Card:</span>
-                <span style="color: ${COLORS.primary}; margin-left: 8px; font-weight: 600;">#${data.cardNumber}</span>
-              </td>
-            </tr>
-            ` : ''}
-          </table>
+        <td style="padding-bottom: 14px;">
+          <p style="margin: 0; font-size: 10px; color: ${C.accent}; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">Session</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-bottom: 6px;">
+          <p style="margin: 0; font-size: 16px; color: ${C.white}; font-weight: 600;">${data.title}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-bottom: 4px;">
+          <p style="margin: 0; font-size: 13px; color: ${C.text};">${data.artistName}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-bottom: 4px;">
+          <p style="margin: 0; font-size: 13px; color: ${C.muted};">${data.formattedDate}</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p style="margin: 0; font-size: 13px; color: ${C.muted};">${data.startTime} &ndash; ${data.endTime}</p>
+        </td>
+      </tr>
+      ${data.cardNumber ? `
+      <tr>
+        <td style="padding-top: 4px;">
+          <p style="margin: 0; font-size: 13px; color: ${C.muted};">Black Card <span style="color: ${C.white}; font-weight: 600;">#${data.cardNumber}</span></p>
+        </td>
+      </tr>
+      ` : ''}
+    </table>
+  `;
+}
+
+/** Minimal ticket code display */
+function ticketCodeBlock(code: string) {
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
+      <tr>
+        <td style="text-align: center; padding: 28px 0; border-top: 1px solid ${C.rule}; border-bottom: 1px solid ${C.rule};">
+          <p style="margin: 0 0 10px 0; font-size: 10px; color: ${C.muted}; text-transform: uppercase; letter-spacing: 2px;">Ticket Code</p>
+          <p style="margin: 0; font-size: 28px; font-weight: 300; color: ${C.white}; letter-spacing: 6px; font-family: 'Courier New', monospace;">${code}</p>
         </td>
       </tr>
     </table>
   `;
 }
 
-// Ticket code display component
-function ticketCodeBox(code: string) {
-  return `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.primary}; margin: 24px 0;">
-      <tr>
-        <td style="padding: 24px; text-align: center;">
-          <p style="margin: 0 0 8px 0; font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px;">
-            Your Ticket Code
-          </p>
-          <p style="margin: 0; font-size: 32px; font-weight: 700; color: ${COLORS.white}; letter-spacing: 4px; font-family: 'Courier New', monospace;">
-            ${code}
-          </p>
-        </td>
-      </tr>
-    </table>
-  `;
+/** Thin horizontal rule */
+function rule() {
+  return `<div style="height: 1px; background-color: ${C.rule}; margin: 32px 0;"></div>`;
 }
 
-// Status badge component
-function statusBadge(text: string, type: 'success' | 'warning' | 'info' | 'error') {
-  const colors = {
-    success: { bg: '#166534', text: '#86efac' },
-    warning: { bg: '#854d0e', text: '#fde047' },
-    info: { bg: '#1e40af', text: '#93c5fd' },
-    error: { bg: '#991b1b', text: '#fca5a5' },
-  };
-  const color = colors[type];
+// ── Helpers ───────────────────────────────────
 
-  return `
-    <span style="display: inline-block; padding: 4px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; background-color: ${color.bg}; color: ${color.text};">
-      ${text}
-    </span>
-  `;
-}
-
-// Format date helper
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -205,14 +172,17 @@ function formatDate(date: string) {
   });
 }
 
-// Format time helper (strip seconds if present)
 function formatTime(time: string) {
   return time.slice(0, 5);
 }
 
-// ============================================
-// EMAIL TYPES
-// ============================================
+function p(text: string, opts?: { muted?: boolean; small?: boolean }) {
+  const color = opts?.muted ? C.muted : C.text;
+  const size = opts?.small ? '12px' : '14px';
+  return `<p style="margin: 0 0 16px 0; font-size: ${size}; color: ${color}; line-height: 1.7;">${text}</p>`;
+}
+
+// ── Email types ──────────────────────────────
 
 interface BookingConfirmationData {
   to: string;
@@ -237,22 +207,18 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
   const isConfirmed = data.status === 'confirmed';
 
   const subject = isConfirmed
-    ? `Booking confirmed: ${data.sessionTitle}`
-    : `Waitlist: ${data.sessionTitle}`;
+    ? `Booking confirmed \u2014 ${data.sessionTitle}`
+    : `Waitlist \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.guestName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.guestName}</strong>,`)}
 
-    <p style="margin: 0 0 8px 0; font-size: 14px; color: ${COLORS.text};">
-      ${isConfirmed
-        ? `your booking has been confirmed! ${statusBadge('Confirmed', 'success')}`
-        : `you are now on the waitlist. ${statusBadge(`Position ${data.position}`, 'warning')}`
-      }
-    </p>
+    ${isConfirmed
+      ? p('your booking has been confirmed.')
+      : p(`you are on position ${data.position} of the waitlist.`)
+    }
 
-    ${sessionInfoBox({
+    ${sessionBlock({
       title: data.sessionTitle,
       artistName: data.artistName,
       formattedDate,
@@ -261,17 +227,12 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
       cardNumber: data.cardNumber,
     })}
 
-    ${isConfirmed ? `
-      <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-        Please bring your <strong style="color: ${COLORS.text};">Black Card #${data.cardNumber}</strong> and show it at the entrance.
-      </p>
-    ` : `
-      <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-        We will notify you by email as soon as a spot becomes available.
-      </p>
-    `}
+    ${isConfirmed
+      ? p(`Please bring your <strong style="color: ${C.white};">Black Card #${data.cardNumber}</strong> and show it at the entrance.`, { muted: true, small: true })
+      : p('We will notify you by email as soon as a spot becomes available.', { muted: true, small: true })
+    }
 
-    ${emailButton('View My Bookings', `${APP_URL}/my-bookings`, true)}
+    ${emailButton('View Bookings', `${APP_URL}/my-bookings`)}
   `;
 
   const htmlBody = emailWrapper(content, isConfirmed
@@ -295,7 +256,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData) {
   }
 }
 
-// ============================================
+// ──────────────────────────────────────────────
 
 interface WaitlistPromotionData {
   to: string;
@@ -315,19 +276,14 @@ export async function sendWaitlistPromotion(data: WaitlistPromotionData) {
   }
 
   const formattedDate = formatDate(data.date);
-  const subject = `Spot available! ${data.sessionTitle}`;
+  const subject = `Spot available \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.guestName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.guestName}</strong>,`)}
 
-    <p style="margin: 0 0 8px 0; font-size: 14px; color: ${COLORS.text};">
-      Good news! A spot has become available and your booking has been confirmed.
-      ${statusBadge('Now confirmed', 'success')}
-    </p>
+    ${p('a spot has opened up and your booking has been confirmed.')}
 
-    ${sessionInfoBox({
+    ${sessionBlock({
       title: data.sessionTitle,
       artistName: data.artistName,
       formattedDate,
@@ -336,14 +292,12 @@ export async function sendWaitlistPromotion(data: WaitlistPromotionData) {
       cardNumber: data.cardNumber,
     })}
 
-    <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-      Please bring your <strong style="color: ${COLORS.text};">Black Card #${data.cardNumber}</strong> and show it at the entrance.
-    </p>
+    ${p(`Please bring your <strong style="color: ${C.white};">Black Card #${data.cardNumber}</strong> and show it at the entrance.`, { muted: true, small: true })}
 
-    ${emailButton('View My Bookings', `${APP_URL}/my-bookings`, true)}
+    ${emailButton('View Bookings', `${APP_URL}/my-bookings`)}
   `;
 
-  const htmlBody = emailWrapper(content, `A spot has become available! Your booking for ${data.sessionTitle} has been confirmed.`);
+  const htmlBody = emailWrapper(content, `A spot has opened up! Your booking for ${data.sessionTitle} has been confirmed.`);
 
   try {
     await client.sendEmail({
@@ -361,7 +315,7 @@ export async function sendWaitlistPromotion(data: WaitlistPromotionData) {
   }
 }
 
-// ============================================
+// ──────────────────────────────────────────────
 
 interface CancellationData {
   to: string;
@@ -380,46 +334,37 @@ export async function sendCancellationNotification(data: CancellationData) {
 
   const formattedDate = formatDate(data.date);
   const subject = data.cancelledByUser
-    ? `Booking cancelled: ${data.sessionTitle}`
-    : `Session cancelled: ${data.sessionTitle}`;
+    ? `Cancelled \u2014 ${data.sessionTitle}`
+    : `Session cancelled \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.guestName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.guestName}</strong>,`)}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      ${data.cancelledByUser
-        ? `your booking has been successfully cancelled. ${statusBadge('Cancelled', 'info')}`
-        : `unfortunately, the following session has been cancelled. ${statusBadge('Cancelled', 'error')}`
-      }
-    </p>
+    ${data.cancelledByUser
+      ? p('your booking has been cancelled.')
+      : p('unfortunately, the following session has been cancelled.')
+    }
 
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.background}; border-left: 3px solid ${data.cancelledByUser ? COLORS.textMuted : '#991b1b'}; margin: 24px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
       <tr>
-        <td style="padding: 20px;">
-          <h2 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: ${COLORS.white}; text-decoration: line-through; opacity: 0.7;">
-            ${data.sessionTitle}
-          </h2>
-          <p style="margin: 0; font-size: 13px; color: ${COLORS.textMuted};">
-            ${data.artistName} • ${formattedDate}
-          </p>
+        <td>
+          <p style="margin: 0 0 4px 0; font-size: 16px; color: ${C.muted}; font-weight: 600; text-decoration: line-through;">${data.sessionTitle}</p>
+          <p style="margin: 0; font-size: 13px; color: ${C.muted};">${data.artistName} &mdash; ${formattedDate}</p>
         </td>
       </tr>
     </table>
 
-    ${!data.cancelledByUser ? `
-      <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-        We apologize for the inconvenience. Feel free to check out our other sessions.
-      </p>
-    ` : ''}
+    ${!data.cancelledByUser
+      ? p('We apologize for the inconvenience. Check out our other sessions.', { muted: true, small: true })
+      : ''
+    }
 
-    ${emailButton('Book New Session', APP_URL, true)}
+    ${emailButton('Browse Sessions', APP_URL)}
   `;
 
   const htmlBody = emailWrapper(content, data.cancelledByUser
     ? `Your booking for ${data.sessionTitle} has been cancelled.`
-    : `The session ${data.sessionTitle} has unfortunately been cancelled.`
+    : `The session ${data.sessionTitle} has been cancelled.`
   );
 
   try {
@@ -438,7 +383,7 @@ export async function sendCancellationNotification(data: CancellationData) {
   }
 }
 
-// ============================================
+// ──────────────────────────────────────────────
 
 interface GLTicketData {
   to: string;
@@ -450,7 +395,7 @@ interface GLTicketData {
   endTime: string;
   ticketCode: string;
   allocatedBy?: string;
-  qrDataUrl?: string; // base64 PNG QR code
+  qrDataUrl?: string;
 }
 
 export async function sendGLTicket(data: GLTicketData) {
@@ -461,29 +406,14 @@ export async function sendGLTicket(data: GLTicketData) {
 
   const formattedDate = formatDate(data.date);
   const ticketUrl = `${APP_URL}/gl/${data.ticketCode}`;
-  const subject = `Guest List: ${data.sessionTitle}`;
-
-  const qrSection = data.qrDataUrl ? `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 24px 0;">
-      <tr>
-        <td align="center" style="padding: 0;">
-          <img src="${data.qrDataUrl}" alt="QR Code" width="180" height="180" style="display: block; border: 6px solid ${COLORS.white};" />
-        </td>
-      </tr>
-    </table>
-  ` : '';
+  const subject = `Guest List \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.guestName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.guestName}</strong>,`)}
 
-    <p style="margin: 0 0 8px 0; font-size: 14px; color: ${COLORS.text};">
-      you're on the guest list${data.allocatedBy ? ` by <strong>${data.allocatedBy}</strong>` : ''}!
-      ${statusBadge('Guest List', 'success')}
-    </p>
+    ${p(`you are on the guest list${data.allocatedBy ? ` of <strong style="color: ${C.white};">${data.allocatedBy}</strong>` : ''}.`)}
 
-    ${sessionInfoBox({
+    ${sessionBlock({
       title: data.sessionTitle,
       artistName: data.artistName,
       formattedDate,
@@ -491,15 +421,21 @@ export async function sendGLTicket(data: GLTicketData) {
       endTime: formatTime(data.endTime),
     })}
 
-    ${ticketCodeBox(data.ticketCode)}
+    ${ticketCodeBlock(data.ticketCode)}
 
-    ${qrSection}
+    ${data.qrDataUrl ? `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 0 0 32px 0;">
+      <tr>
+        <td align="center">
+          <img src="${data.qrDataUrl}" alt="QR Code" width="160" height="160" style="display: block;" />
+        </td>
+      </tr>
+    </table>
+    ` : ''}
 
-    <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted}; text-align: center;">
-      Show this code or the QR code at the entrance.
-    </p>
+    ${p('Show this code or the QR code at the entrance.', { muted: true, small: true })}
 
-    ${emailButton('View Ticket in Browser', ticketUrl, true)}
+    ${emailButton('View Ticket', ticketUrl)}
   `;
 
   const htmlBody = emailWrapper(content, `Your guest list ticket for ${data.sessionTitle}.`);
@@ -520,7 +456,7 @@ export async function sendGLTicket(data: GLTicketData) {
   }
 }
 
-// ============================================
+// ──────────────────────────────────────────────
 
 interface ReminderData {
   to: string;
@@ -542,19 +478,14 @@ export async function sendSessionReminder(data: ReminderData) {
   }
 
   const formattedDate = formatDate(data.date);
-  const subject = `Reminder: ${data.sessionTitle} tomorrow!`;
+  const subject = `Tomorrow \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.guestName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.guestName}</strong>,`)}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Don't forget – your recording session is tomorrow!
-      ${statusBadge('Tomorrow', 'warning')}
-    </p>
+    ${p('your recording session is tomorrow.')}
 
-    ${sessionInfoBox({
+    ${sessionBlock({
       title: data.sessionTitle,
       artistName: data.artistName,
       formattedDate,
@@ -563,20 +494,15 @@ export async function sendSessionReminder(data: ReminderData) {
       cardNumber: data.cardNumber,
     })}
 
-    ${data.type === 'cardholder' ? `
-      <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-        Please bring your <strong style="color: ${COLORS.text};">Black Card #${data.cardNumber}</strong>.
-      </p>
-    ` : `
-      ${ticketCodeBox(data.ticketCode!)}
-      <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted}; text-align: center;">
-        Show this code at the entrance.
-      </p>
-    `}
+    ${data.type === 'cardholder'
+      ? p(`Please bring your <strong style="color: ${C.white};">Black Card #${data.cardNumber}</strong>.`, { muted: true, small: true })
+      : `${ticketCodeBlock(data.ticketCode!)}
+         ${p('Show this code at the entrance.', { muted: true, small: true })}`
+    }
 
     ${data.type === 'cardholder'
-      ? emailButton('My Bookings', `${APP_URL}/my-bookings`, true)
-      : emailButton('View Ticket', `${APP_URL}/gl/${data.ticketCode}`, true)
+      ? emailButton('View Bookings', `${APP_URL}/my-bookings`)
+      : emailButton('View Ticket', `${APP_URL}/gl/${data.ticketCode}`)
     }
   `;
 
@@ -598,7 +524,7 @@ export async function sendSessionReminder(data: ReminderData) {
   }
 }
 
-// ============================================
+// ──────────────────────────────────────────────
 
 interface CheckInConfirmationData {
   to: string;
@@ -613,33 +539,23 @@ export async function sendCheckInConfirmation(data: CheckInConfirmationData) {
     return { sent: false, reason: 'not_configured' };
   }
 
-  const subject = `Checked In: ${data.sessionTitle}`;
+  const subject = `Check-in \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.guestName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.guestName}</strong>,`)}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      You have been successfully checked in! ${statusBadge('Checked In', 'success')}
-    </p>
+    ${p('you have been checked in.')}
 
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.background}; border-left: 3px solid #166534; margin: 24px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
       <tr>
-        <td style="padding: 20px; text-align: center;">
-          <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: ${COLORS.white};">
-            ${data.sessionTitle}
-          </h2>
-          <p style="margin: 0; font-size: 14px; color: ${COLORS.textMuted};">
-            with ${data.artistName}
-          </p>
+        <td>
+          <p style="margin: 0 0 4px 0; font-size: 16px; color: ${C.white}; font-weight: 600;">${data.sessionTitle}</p>
+          <p style="margin: 0; font-size: 13px; color: ${C.muted};">with ${data.artistName}</p>
         </td>
       </tr>
     </table>
 
-    <p style="margin: 0; font-size: 13px; color: ${COLORS.textMuted}; text-align: center;">
-      Enjoy the session!
-    </p>
+    ${p('Enjoy the session.', { muted: true, small: true })}
   `;
 
   const htmlBody = emailWrapper(content, `You have been checked in at ${data.sessionTitle}.`);
@@ -660,15 +576,7 @@ export async function sendCheckInConfirmation(data: CheckInConfirmationData) {
   }
 }
 
-// ============================================
-// DJ GUEST LIST (CONSOLIDATED EMAIL)
-// ============================================
-
-interface DJGuestListTicket {
-  code: string;
-  guestName: string;
-  qrDataUrl: string; // base64 PNG
-}
+// ──────────────────────────────────────────────
 
 interface DJGuestListData {
   to: string;
@@ -677,7 +585,11 @@ interface DJGuestListData {
   date: string;
   startTime: string;
   endTime: string;
-  tickets: DJGuestListTicket[];
+  tickets: Array<{
+    guestName: string;
+    code: string;
+    qrDataUrl: string;
+  }>;
 }
 
 export async function sendDJGuestListEmail(data: DJGuestListData) {
@@ -688,52 +600,30 @@ export async function sendDJGuestListEmail(data: DJGuestListData) {
 
   const formattedDate = formatDate(data.date);
   const ticketCount = data.tickets.length;
-  const subject = `DJ Guest List: ${data.sessionTitle} (${ticketCount} Ticket${ticketCount > 1 ? 's' : ''})`;
+  const subject = `Guest List Tickets \u2014 ${data.sessionTitle}`;
 
   const ticketCards = data.tickets.map((ticket, i) => `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.background}; border: 1px solid ${COLORS.border}; margin: 16px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 16px 0; border-top: 1px solid ${C.rule};">
       <tr>
-        <td style="padding: 20px;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-            <tr>
-              <td style="vertical-align: top;">
-                <p style="margin: 0 0 4px 0; font-size: 11px; color: ${COLORS.textMuted}; text-transform: uppercase; letter-spacing: 0.5px;">
-                  Ticket ${i + 1} of ${ticketCount}
-                </p>
-                <p style="margin: 0 0 12px 0; font-size: 13px; color: ${COLORS.text};">
-                  ${ticket.guestName}
-                </p>
-                <p style="margin: 0 0 4px 0; font-size: 11px; color: ${COLORS.textMuted}; text-transform: uppercase; letter-spacing: 0.5px;">
-                  Ticket Code
-                </p>
-                <p style="margin: 0 0 12px 0; font-size: 22px; font-weight: 700; color: ${COLORS.white}; letter-spacing: 3px; font-family: 'Courier New', monospace;">
-                  ${ticket.code}
-                </p>
-                <a href="${APP_URL}/gl/${ticket.code}" target="_blank" style="font-size: 12px; color: ${COLORS.primary}; text-decoration: underline;">
-                  Open ticket in browser
-                </a>
-              </td>
-              <td style="width: 120px; vertical-align: top; text-align: right;">
-                <img src="${ticket.qrDataUrl}" alt="QR Code" width="110" height="110" style="display: block; border: 4px solid ${COLORS.white};" />
-              </td>
-            </tr>
-          </table>
+        <td style="padding: 20px 0; vertical-align: top;">
+          <p style="margin: 0 0 2px 0; font-size: 10px; color: ${C.muted}; text-transform: uppercase; letter-spacing: 2px;">Ticket ${i + 1} of ${ticketCount}</p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: ${C.white};">${ticket.guestName}</p>
+          <p style="margin: 0 0 8px 0; font-size: 20px; font-weight: 300; color: ${C.white}; letter-spacing: 4px; font-family: 'Courier New', monospace;">${ticket.code}</p>
+          <a href="${APP_URL}/gl/${ticket.code}" target="_blank" style="font-size: 11px; color: ${C.muted}; text-decoration: underline;">Open ticket</a>
+        </td>
+        <td style="width: 110px; vertical-align: top; text-align: right; padding-top: 20px;">
+          <img src="${ticket.qrDataUrl}" alt="QR Code" width="100" height="100" style="display: block;" />
         </td>
       </tr>
     </table>
   `).join('');
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.artistName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.artistName}</strong>,`)}
 
-    <p style="margin: 0 0 8px 0; font-size: 14px; color: ${COLORS.text};">
-      here are your <strong>${ticketCount} guest list ticket${ticketCount > 1 ? 's' : ''}</strong> for the upcoming session.
-      Forward the individual tickets to your guests.
-    </p>
+    ${p(`here are your <strong style="color: ${C.white};">${ticketCount} guest list ticket${ticketCount > 1 ? 's' : ''}</strong> for the upcoming session. Forward the individual tickets to your guests.`)}
 
-    ${sessionInfoBox({
+    ${sessionBlock({
       title: data.sessionTitle,
       artistName: data.artistName,
       formattedDate,
@@ -743,16 +633,9 @@ export async function sendDJGuestListEmail(data: DJGuestListData) {
 
     ${ticketCards}
 
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: rgba(110, 41, 49, 0.15); border-left: 3px solid ${COLORS.primary}; margin: 24px 0;">
-      <tr>
-        <td style="padding: 16px 20px;">
-          <p style="margin: 0; font-size: 12px; color: ${COLORS.textMuted};">
-            <strong style="color: ${COLORS.text};">Note:</strong> Each ticket is valid only once and cannot be used twice.
-            Your guests show the QR code or ticket code at the entrance.
-          </p>
-        </td>
-      </tr>
-    </table>
+    ${rule()}
+
+    ${p('Each ticket is valid only once. Your guests show the QR code or ticket code at the entrance.', { muted: true, small: true })}
   `;
 
   const htmlBody = emailWrapper(content, `${ticketCount} guest list tickets for ${data.sessionTitle}`);
@@ -773,9 +656,7 @@ export async function sendDJGuestListEmail(data: DJGuestListData) {
   }
 }
 
-// ============================================
-// EMAIL VERIFICATION
-// ============================================
+// ──────────────────────────────────────────────
 
 interface VerificationCodeData {
   to: string;
@@ -796,36 +677,14 @@ export async function sendVerificationCode(data: VerificationCodeData) {
   }
 
   const formattedDate = formatDate(data.date);
-  const subject = `Verification code for ${data.sessionTitle}`;
-
-  const verificationCodeDisplay = `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.primary}; margin: 24px 0;">
-      <tr>
-        <td style="padding: 32px; text-align: center;">
-          <p style="margin: 0 0 12px 0; font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px;">
-            Your Verification Code
-          </p>
-          <p style="margin: 0; font-size: 48px; font-weight: 700; color: ${COLORS.white}; letter-spacing: 8px; font-family: 'Courier New', monospace;">
-            ${data.verificationCode}
-          </p>
-          <p style="margin: 16px 0 0 0; font-size: 12px; color: rgba(255,255,255,0.6);">
-            Code valid for 15 minutes
-          </p>
-        </td>
-      </tr>
-    </table>
-  `;
+  const subject = `Verification code \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.guestName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.guestName}</strong>,`)}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Please confirm your email address to complete the booking for the following session:
-    </p>
+    ${p('confirm your email address to complete the booking.')}
 
-    ${sessionInfoBox({
+    ${sessionBlock({
       title: data.sessionTitle,
       artistName: data.artistName,
       formattedDate,
@@ -833,15 +692,21 @@ export async function sendVerificationCode(data: VerificationCodeData) {
       endTime: formatTime(data.endTime),
     })}
 
-    ${verificationCodeDisplay}
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
+      <tr>
+        <td style="text-align: center; padding: 32px 0; border-top: 1px solid ${C.rule}; border-bottom: 1px solid ${C.rule};">
+          <p style="margin: 0 0 10px 0; font-size: 10px; color: ${C.muted}; text-transform: uppercase; letter-spacing: 2px;">Verification Code</p>
+          <p style="margin: 0; font-size: 36px; font-weight: 300; color: ${C.white}; letter-spacing: 8px; font-family: 'Courier New', monospace;">${data.verificationCode}</p>
+          <p style="margin: 12px 0 0 0; font-size: 11px; color: ${C.muted};">Valid for 15 minutes</p>
+        </td>
+      </tr>
+    </table>
 
-    <p style="margin: 0 0 8px 0; font-size: 13px; color: ${COLORS.textMuted};">
-      <strong style="color: ${COLORS.text};">Black Card:</strong> ${data.cardCode}
-    </p>
+    ${p(`Black Card: <strong style="color: ${C.white};">${data.cardCode}</strong>`, { muted: true, small: true })}
 
-    <p style="margin: 24px 0 0 0; font-size: 12px; color: ${COLORS.textMuted};">
-      If you did not request this booking, you can ignore this email.
-    </p>
+    ${rule()}
+
+    ${p('If you did not request this booking, you can ignore this email.', { muted: true, small: true })}
   `;
 
   const htmlBody = emailWrapper(content, `Your verification code: ${data.verificationCode}`);
@@ -862,9 +727,7 @@ export async function sendVerificationCode(data: VerificationCodeData) {
   }
 }
 
-// ============================================
-// APPLICATION WORKFLOW EMAILS
-// ============================================
+// ── Application workflow emails ──────────────
 
 interface ApplicationAcceptedData {
   to: string;
@@ -883,23 +746,14 @@ export async function sendApplicationAccepted(data: ApplicationAcceptedData) {
   }
 
   const formattedDate = formatDate(data.date);
-  const subject = `Application accepted: ${data.sessionTitle}`;
+  const subject = `Application accepted \u2014 ${data.sessionTitle}`;
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.artistName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.artistName}</strong>,`)}
 
-    <p style="margin: 0 0 8px 0; font-size: 14px; color: ${COLORS.text};">
-      Congratulations! Your application has been accepted.
-      ${statusBadge('Accepted', 'success')}
-    </p>
+    ${p('your application has been accepted. Your recording session has been created.')}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Your recording session has been created:
-    </p>
-
-    ${sessionInfoBox({
+    ${sessionBlock({
       title: data.sessionTitle,
       artistName: data.artistName,
       formattedDate,
@@ -907,11 +761,9 @@ export async function sendApplicationAccepted(data: ApplicationAcceptedData) {
       endTime: formatTime(data.endTime),
     })}
 
-    <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-      We look forward to your session! Feel free to contact us if you have any questions.
-    </p>
+    ${p('We look forward to your session. Feel free to contact us if you have any questions.', { muted: true, small: true })}
 
-    ${emailButton('View Session', `${APP_URL}/book/${data.sessionId}`, true)}
+    ${emailButton('View Session', `${APP_URL}/book/${data.sessionId}`)}
   `;
 
   const htmlBody = emailWrapper(content, `Your application for ${data.sessionTitle} has been accepted!`);
@@ -932,7 +784,7 @@ export async function sendApplicationAccepted(data: ApplicationAcceptedData) {
   }
 }
 
-// ============================================
+// ──────────────────────────────────────────────
 
 interface ApplicationRejectedData {
   to: string;
@@ -946,36 +798,25 @@ export async function sendApplicationRejected(data: ApplicationRejectedData) {
     return { sent: false, reason: 'not_configured' };
   }
 
-  const subject = 'GOTEC Records — Application';
+  const subject = 'GOTEC Records \u2014 Application';
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.artistName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.artistName}</strong>,`)}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      thank you for your application to GOTEC Records.
-    </p>
+    ${p('thank you for your application to GOTEC Records.')}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Unfortunately, we cannot offer you a recording slot at this time. We received many strong applications and the selection was not easy.
-    </p>
+    ${p('Unfortunately, we cannot offer you a recording slot at this time.')}
 
     ${data.rejectionReason ? `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 24px 0;">
-      <tr>
-        <td style="border-left: 2px solid ${COLORS.border}; padding: 0 0 0 16px;">
-          <p style="margin: 0; font-size: 13px; color: ${COLORS.textMuted}; white-space: pre-wrap;">${data.rejectionReason}</p>
-        </td>
-      </tr>
-    </table>
+      ${rule()}
+      <p style="margin: 0 0 6px 0; font-size: 10px; color: ${C.muted}; text-transform: uppercase; letter-spacing: 2px;">Reason</p>
+      <p style="margin: 0 0 16px 0; font-size: 13px; color: ${C.text}; line-height: 1.7; white-space: pre-wrap;">${data.rejectionReason}</p>
+      ${rule()}
     ` : ''}
 
-    <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-      Feel free to reapply when new slots become available. We wish you continued success!
-    </p>
+    ${p('Feel free to reapply when new slots become available.', { muted: true, small: true })}
 
-    ${emailButton('Submit New Application', `${APP_URL}/apply`, true)}
+    ${emailButton('Submit New Application', `${APP_URL}/apply`)}
   `;
 
   const htmlBody = emailWrapper(content, 'Update about your application to GOTEC Records.');
@@ -996,7 +837,7 @@ export async function sendApplicationRejected(data: ApplicationRejectedData) {
   }
 }
 
-// ============================================
+// ──────────────────────────────────────────────
 
 interface SlotTakenData {
   to: string;
@@ -1016,40 +857,22 @@ export async function sendSlotTaken(data: SlotTakenData) {
   const subject = 'Recording Slot Assigned';
 
   const content = `
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      Hello <strong>${data.artistName}</strong>,
-    </p>
+    ${p(`Hello <strong style="color: ${C.white};">${data.artistName}</strong>,`)}
 
-    <p style="margin: 0 0 16px 0; font-size: 14px; color: ${COLORS.text};">
-      the recording slot you applied for has been assigned:
-    </p>
+    ${p('the recording slot you applied for has been assigned.')}
 
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${COLORS.background}; border-left: 3px solid ${COLORS.textMuted}; margin: 24px 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 32px 0;">
       <tr>
-        <td style="padding: 20px;">
-          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-            <tr>
-              <td style="padding: 4px 0; font-size: 13px;">
-                <span style="color: ${COLORS.textMuted};">Date:</span>
-                <span style="color: ${COLORS.text}; margin-left: 8px; text-decoration: line-through; opacity: 0.7;">${formattedDate}</span>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 4px 0; font-size: 13px;">
-                <span style="color: ${COLORS.textMuted};">Time:</span>
-                <span style="color: ${COLORS.text}; margin-left: 8px; text-decoration: line-through; opacity: 0.7;">${formatTime(data.startTime)} – ${formatTime(data.endTime)}</span>
-              </td>
-            </tr>
-          </table>
+        <td>
+          <p style="margin: 0 0 4px 0; font-size: 13px; color: ${C.muted}; text-decoration: line-through;">${formattedDate}</p>
+          <p style="margin: 0; font-size: 13px; color: ${C.muted}; text-decoration: line-through;">${formatTime(data.startTime)} &ndash; ${formatTime(data.endTime)}</p>
         </td>
       </tr>
     </table>
 
-    <p style="margin: 0 0 24px 0; font-size: 13px; color: ${COLORS.textMuted};">
-      Your application remains active and we will contact you as soon as a suitable slot becomes available.
-    </p>
+    ${p('Your application remains active and we will contact you as soon as a suitable slot becomes available.', { muted: true, small: true })}
 
-    ${emailButton('View Available Slots', `${APP_URL}/apply`, true)}
+    ${emailButton('View Available Slots', `${APP_URL}/apply`)}
   `;
 
   const htmlBody = emailWrapper(content, 'Your selected recording slot has been assigned.');
@@ -1070,17 +893,11 @@ export async function sendSlotTaken(data: SlotTakenData) {
   }
 }
 
-// ============================================
-// UTILITY FUNCTION: Check if email is configured
-// ============================================
+// ──────────────────────────────────────────────
 
 export function isEmailConfigured(): boolean {
   return !!client;
 }
-
-// ============================================
-// UTILITY: Fire-and-forget email with proper logging
-// ============================================
 
 /**
  * Wraps an email send call for fire-and-forget use.
